@@ -10,7 +10,7 @@
   "nodeSupportedVersionRange": ">=18.0.0 <=23.0.0",
   "suppressNodeLtsWarning": true,
   "repository": {
-    "url": "https://github.com/SukantPal/pixi-essentials",
+    "url": "https://github.com/khanzzirfan/pixi-essentials",
     "defaultBranch": "release",
     "defaultRemote": "origin"
   },
@@ -100,7 +100,7 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@pixi-essentials/react-bindings",
+      "packageName": "pixi-essentials-react-bindings-extended",
       "projectFolder": "packages/react-bindings",
       "reviewCategory": "production",
       "shouldPublish": true
@@ -130,7 +130,7 @@
       "shouldPublish": true
     },
     {
-      "packageName": "@pixi-essentials/transformer",
+      "packageName": "pixi-essentials-transformer-extended",
       "projectFolder": "packages/transformer",
       "reviewCategory": "production",
       "shouldPublish": true

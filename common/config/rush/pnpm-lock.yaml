@@ -80,9 +80,12 @@ dependencies:
   '@rush-temp/object-pool':
     specifier: file:./projects/object-pool.tgz
     version: file:projects/object-pool.tgz
-  '@rush-temp/react-bindings':
-    specifier: file:./projects/react-bindings.tgz
-    version: file:projects/react-bindings.tgz(@pixi/constants@5.3.12)(@pixi/graphics@7.1.4)(@pixi/ticker@7.1.4)
+  '@rush-temp/pixi-essentials-react-bindings-extended':
+    specifier: file:./projects/pixi-essentials-react-bindings-extended.tgz
+    version: file:projects/pixi-essentials-react-bindings-extended.tgz(@pixi/constants@5.3.12)(@pixi/graphics@7.1.4)(@pixi/ticker@7.1.4)
+  '@rush-temp/pixi-essentials-transformer-extended':
+    specifier: file:./projects/pixi-essentials-transformer-extended.tgz
+    version: file:projects/pixi-essentials-transformer-extended.tgz
   '@rush-temp/shader-preprocessor':
     specifier: file:./projects/shader-preprocessor.tgz
     version: file:projects/shader-preprocessor.tgz
@@ -95,9 +98,6 @@ dependencies:
   '@rush-temp/texture-allocator':
     specifier: file:./projects/texture-allocator.tgz
     version: file:projects/texture-allocator.tgz
-  '@rush-temp/transformer':
-    specifier: file:./projects/transformer.tgz
-    version: file:projects/transformer.tgz
   '@rush-temp/types':
     specifier: file:./projects/types.tgz
     version: file:projects/types.tgz
@@ -6920,7 +6920,7 @@ packages:
     dev: false
 
   file:projects/examples.tgz:
-    resolution: {integrity: sha512-sycezwCpKKjq10ReS5y5cUEJ+OzL3Umwuia9KO8e1l+VFJGRsdw5UDktLjC2CtGvp6TcChCFKA4KZP3FyKOT9A==, tarball: file:projects/examples.tgz}
+    resolution: {integrity: sha512-G2T2+xstUsFsJ8hPXU719O+B1OEnsZWbCN1E9QR1tOzd9tZ58cAq+4OLbQ+6pT/buqpFc86rwPs8FZp0jV0QdA==, tarball: file:projects/examples.tgz}
     name: '@rush-temp/examples'
     version: 0.0.0
     dependencies:
@@ -7034,10 +7034,10 @@ packages:
       - supports-color
     dev: false
 
-  file:projects/react-bindings.tgz(@pixi/constants@5.3.12)(@pixi/graphics@7.1.4)(@pixi/ticker@7.1.4):
-    resolution: {integrity: sha512-t/QLdPo5yDnXb9KPVtTbaORQyTKpqsMFhLTWZ3GN6cf1Z94iyYlELCcrU3RZFeGzhSe51PEdB4w47ywmWe2pFQ==, tarball: file:projects/react-bindings.tgz}
-    id: file:projects/react-bindings.tgz
-    name: '@rush-temp/react-bindings'
+  file:projects/pixi-essentials-react-bindings-extended.tgz(@pixi/constants@5.3.12)(@pixi/graphics@7.1.4)(@pixi/ticker@7.1.4):
+    resolution: {integrity: sha512-SEhLNqwUkXy7yS05kWD1vVOC2oGujZhITpLohp+azq7Qd7K+xSl/f3/VbJwhDp1mr8/jaUVCeic5zMHyd5Ttrw==, tarball: file:projects/pixi-essentials-react-bindings-extended.tgz}
+    id: file:projects/pixi-essentials-react-bindings-extended.tgz
+    name: '@rush-temp/pixi-essentials-react-bindings-extended'
     version: 0.0.0
     dependencies:
       '@pixi-build-tools/rollup-configurator': 1.0.14(rollup@2.27.1)
@@ -7071,6 +7071,27 @@ packages:
       - supports-color
     dev: false
 
+  file:projects/pixi-essentials-transformer-extended.tgz:
+    resolution: {integrity: sha512-d17g0ZNDVRglI7jVnPpLmw0khI7YEy8Q6g26SQ75gWeIlSTINH5G7Dxc9U/1PPf6cJFlFNzdrkgHL4cMXkujHw==, tarball: file:projects/pixi-essentials-transformer-extended.tgz}
+    name: '@rush-temp/pixi-essentials-transformer-extended'
+    version: 0.0.0
+    dependencies:
+      '@microsoft/api-extractor': 7.47.9
+      '@pixi-build-tools/rollup-configurator': 1.0.14(rollup@2.27.1)
+      '@pixi/core': 7.1.4
+      '@pixi/display': 7.1.4
+      '@pixi/events': 7.1.4
+      '@pixi/graphics': 7.1.4
+      '@pixi/math': 7.1.4
+      eslint: 7.7.0
+      rollup: 2.27.1
+      tslib: 2.0.3
+      typescript: 5.3.3
+    transitivePeerDependencies:
+      - '@types/node'
+      - supports-color
+    dev: false
+
   file:projects/shader-preprocessor.tgz:
     resolution: {integrity: sha512-RHA8u6StVEOgBYUmIZwh2sxgGnVGOSRBGBQyU0ih4aKNm/3kZAlp6nOB4Yl/3+pRe0QVfOcJ2St0KhZVgixCIQ==, tarball: file:projects/shader-preprocessor.tgz}
     name: '@rush-temp/shader-preprocessor'
@@ -7091,7 +7112,7 @@ packages:
     dev: false
 
   file:projects/svg.tgz:
-    resolution: {integrity: sha512-D9T3FhZLJcx5gbcV0c1Lrv75AGGzX8D2u+vRHJgqcB8xOB0mWs8Gf03DmF5PbIgHWyRVmim7tL0XRrm+lBH2LA==, tarball: file:projects/svg.tgz}
+    resolution: {integrity: sha512-Cd+AdHUuOw6v8OR8s1fdecKjtwoBG8VmN9oCUJSiWdUX170zstmtMnaYOmcQQdPfFuRmpY/iLB0zNxsh+H3G/Q==, tarball: file:projects/svg.tgz}
     name: '@rush-temp/svg'
     version: 0.0.0
     dependencies:
@@ -7137,7 +7158,7 @@ packages:
     dev: false
 
   file:projects/texture-allocator.tgz:
-    resolution: {integrity: sha512-/51erNeMNfBZd5RC7nz2dUofJUc89vccuBLBmppUlXqsRlH33i4wOKs1+rZyyAgzaaZkrJ7thMlXz+f42UIEQA==, tarball: file:projects/texture-allocator.tgz}
+    resolution: {integrity: sha512-zpPm2d/3VofInpcDKRnSbeNclhCCgdc/chJUbP/TcPOUujtA4ZqD/Ser7B7h4Idnipl8ZJaZRWGaybVr1RFwNQ==, tarball: file:projects/texture-allocator.tgz}
     name: '@rush-temp/texture-allocator'
     version: 0.0.0
     dependencies:
@@ -7149,27 +7170,6 @@ packages:
       eslint: 7.13.0
       pixi.js: 8.4.1
       rollup: 2.33.3
-      tslib: 2.0.3
-      typescript: 5.3.3
-    transitivePeerDependencies:
-      - '@types/node'
-      - supports-color
-    dev: false
-
-  file:projects/transformer.tgz:
-    resolution: {integrity: sha512-l3YnTX1KXSArLr80N6jDYpCwItorqMprkLcOjzYeZw8choRJRL6xeH9BKW4cLjKYnHyg9Bjq1Q+Pm9ZrQyfN3A==, tarball: file:projects/transformer.tgz}
-    name: '@rush-temp/transformer'
-    version: 0.0.0
-    dependencies:
-      '@microsoft/api-extractor': 7.47.9
-      '@pixi-build-tools/rollup-configurator': 1.0.14(rollup@2.27.1)
-      '@pixi/core': 7.1.4
-      '@pixi/display': 7.1.4
-      '@pixi/events': 7.1.4
-      '@pixi/graphics': 7.1.4
-      '@pixi/math': 7.1.4
-      eslint: 7.7.0
-      rollup: 2.27.1
       tslib: 2.0.3
       typescript: 5.3.3
     transitivePeerDependencies:

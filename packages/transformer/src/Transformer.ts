@@ -1006,9 +1006,19 @@ export class Transformer extends Container_ {
     const unitX = dx / distance;
     const unitY = dy / distance;
 
-    // Use configured values or defaults
+    // Use configured values or defaults, but scale startPosition based on handle size
+    const handleRadius = this._handleStyle.radius || 7;
+    const scaleFactor = handleRadius / 7; // Scale relative to default 7px radius
+    const baseStartPosition = config.startPosition || 0.45;
+
+    // Adjust start position to account for larger handles - move line further from bounding box
+    const adjustedStartPosition = Math.min(
+      0.8,
+      baseStartPosition + (scaleFactor - 1) * 0.1
+    );
+
     const segmentLength = distance * (config.segmentLength || 0.005);
-    const startPosition = distance * (config.startPosition || 0.35);
+    const startPosition = distance * adjustedStartPosition;
     const anchorColor = config.color || color;
     const anchorThickness = config.thickness || lineWidth;
 
@@ -1561,23 +1571,29 @@ export class Transformer extends Container_ {
       let px = -(topLeft.y - topRight.y);
       let py = topLeft.x - topRight.x;
 
-      // Normalize <px,py> to 32 units.
+      // Calculate rotator distance based on handle radius for proper spacing
+      const handleRadius = this._handleStyle.radius || 7;
+      const baseDistance = 32; // Original distance for 7px radius
+      const scaleFactor = handleRadius / 7; // Scale relative to default 7px radius
+      const rotatorDistance = baseDistance * scaleFactor;
+
+      // Normalize <px,py> to the calculated distance.
       const pl = Math.sqrt(px * px + py * py);
 
-      px *= 32 / pl;
-      py *= 32 / pl;
+      px *= rotatorDistance / pl;
+      py *= rotatorDistance / pl;
 
       handles.rotator.position.x = bx + px;
       handles.rotator.position.y = by + py;
 
-      // Draw single dot for rotator anchor
+      // Draw rotator anchor line
       this.drawRotatorAnchorDot(
         bx,
         by,
         handles.rotator.position.x,
         handles.rotator.position.y,
-        this.wireframeStyle.thickness,
-        this.wireframeStyle.color
+        this._wireframeStyle.thickness,
+        this._wireframeStyle.color
       );
 
       this.handleAnchors.rotator.copyFrom(handles.rotator.position);

@@ -264,6 +264,84 @@
       </div>
     </div>
 
+    <!-- Handle Size Examples -->
+    <div class="controls-section">
+      <h3>📏 Handle Size Examples</h3>
+      <div class="controls-grid">
+        <div class="control-group">
+          <label>Size Presets:</label>
+          <button onclick="applySizePreset('small')" class="preset-btn">
+            Small (Default)
+          </button>
+          <button onclick="applySizePreset('medium')" class="preset-btn">
+            Medium (150%)
+          </button>
+          <button onclick="applySizePreset('large')" class="preset-btn">
+            Large (200%)
+          </button>
+          <button onclick="applySizePreset('xlarge')" class="preset-btn">
+            Extra Large (300%)
+          </button>
+        </div>
+
+        <div class="control-group">
+          <label>Custom Handle Radius:</label>
+          <input
+            type="range"
+            min="7"
+            max="50"
+            step="1"
+            value="7"
+            oninput="updateHandleRadius(this.value)"
+            id="handle-radius"
+          />
+          <span id="radius-value">7px</span>
+        </div>
+
+        <div class="control-group">
+          <label>Outline Thickness:</label>
+          <input
+            type="range"
+            min="1"
+            max="15"
+            step="0.5"
+            value="2.5"
+            oninput="updateOutlineThickness(this.value)"
+            id="outline-thickness"
+          />
+          <span id="outline-value">2.5px</span>
+        </div>
+
+        <div class="control-group">
+          <label>Glow Intensity:</label>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value="0.15"
+            oninput="updateGlowIntensity(this.value)"
+            id="glow-intensity"
+          />
+          <span id="glow-value">0.15</span>
+        </div>
+
+        <div class="control-group">
+          <label>Wireframe Thickness:</label>
+          <input
+            type="range"
+            min="1"
+            max="15"
+            step="0.5"
+            value="2"
+            oninput="updateWireframeThickness(this.value)"
+            id="wireframe-thickness"
+          />
+          <span id="wireframe-value">2px</span>
+        </div>
+      </div>
+    </div>
+
     <!-- Rotator Anchor Controls -->
     <div class="controls-section">
       <h3>🎯 Rotator Anchor Configuration</h3>
@@ -454,7 +532,7 @@
         autoDensity: true,
         resolution: window.devicePixelRatio || 1,
         view: document.getElementById("pen-canvas"),
-        backgroundColor: 0xffffff,
+        backgroundColor: 0x000,
         antialias: true,
       });
 
@@ -597,6 +675,26 @@
       };
 
       // Theme switching function
+      function safeClone(obj) {
+        try {
+          return JSON.parse(JSON.stringify(obj));
+        } catch (_) {
+          return obj;
+        }
+      }
+
+      function logTransformerState(label) {
+        if (!transformer) return;
+        const snapshot = {
+          label,
+          colorTheme: safeClone(transformer.colorTheme),
+          handleStyle: safeClone(transformer.handleStyle),
+          wireframeStyle: safeClone(transformer.wireframeStyle),
+          rotatorAnchor: safeClone(transformer.rotatorAnchor),
+        };
+        console.log("[Transformer State]", snapshot);
+      }
+
       function switchTheme(themeName) {
         if (!transformer) {
           console.warn("Transformer not yet initialized. Please wait...");
@@ -609,12 +707,22 @@
           return;
         }
 
+        console.groupCollapsed("[Theme] Switching ->", themeName);
+        console.log("[Theme] Requested theme:", safeClone(theme));
+        logTransformerState("before-switch");
+
         // Update transformer colors
         transformer.colorTheme = {
           ...theme,
           background: 0xffffff,
           glowIntensity: 0.15,
         };
+
+        logTransformerState("after-switch (immediate)");
+        requestAnimationFrame(() => {
+          logTransformerState("after-switch (next frame)");
+          console.groupEnd();
+        });
 
         // Update button states
         document.querySelectorAll(".theme-btn").forEach((btn) => {
@@ -628,7 +736,7 @@
           activeButton.classList.add("active");
         }
 
-        console.log(`Switched to ${themeName} theme:`, theme);
+        console.log(`[Theme] Switched to '${themeName}'`);
       }
 
       // Rotator Anchor Control Functions
@@ -864,6 +972,190 @@
         setAnchorStyle(newConfig.style);
 
         console.log(`Applied ${preset} preset:`, newConfig);
+      }
+
+      // Handle Size Control Functions
+      function applySizePreset(preset) {
+        if (!transformer) {
+          console.warn("Transformer not yet initialized. Please wait...");
+          return;
+        }
+
+        let handleStyle, wireframeStyle, rotatorAnchor;
+
+        switch (preset) {
+          case "small":
+            handleStyle = {
+              radius: 7,
+              outlineThickness: 2.5,
+              glowIntensity: 0.15,
+            };
+            wireframeStyle = {
+              thickness: 2,
+            };
+            rotatorAnchor = {
+              thickness: 2,
+              segmentLength: 0.005,
+            };
+            break;
+          case "medium":
+            handleStyle = {
+              radius: 10,
+              outlineThickness: 3.5,
+              glowIntensity: 0.25,
+            };
+            wireframeStyle = {
+              thickness: 3,
+            };
+            rotatorAnchor = {
+              thickness: 3,
+              segmentLength: 0.008,
+            };
+            break;
+          case "large":
+            handleStyle = {
+              radius: 14,
+              outlineThickness: 5,
+              glowIntensity: 0.35,
+            };
+            wireframeStyle = {
+              thickness: 4,
+            };
+            rotatorAnchor = {
+              thickness: 4,
+              segmentLength: 0.012,
+            };
+            break;
+          case "xlarge":
+            handleStyle = {
+              radius: 21,
+              outlineThickness: 7.5,
+              glowIntensity: 0.5,
+            };
+            wireframeStyle = {
+              thickness: 6,
+            };
+            rotatorAnchor = {
+              thickness: 6,
+              segmentLength: 0.015,
+            };
+            break;
+        }
+
+        // Apply the new styles
+        transformer.handleStyle = {
+          ...transformer.handleStyle,
+          ...handleStyle,
+        };
+        transformer.wireframeStyle = {
+          ...transformer.wireframeStyle,
+          ...wireframeStyle,
+        };
+        transformer.rotatorAnchor = {
+          ...transformer.rotatorAnchor,
+          ...rotatorAnchor,
+        };
+
+        // Update UI controls
+        document.getElementById("handle-radius").value = handleStyle.radius;
+        document.getElementById(
+          "radius-value"
+        ).textContent = `${handleStyle.radius}px`;
+        document.getElementById("outline-thickness").value =
+          handleStyle.outlineThickness;
+        document.getElementById(
+          "outline-value"
+        ).textContent = `${handleStyle.outlineThickness}px`;
+        document.getElementById("glow-intensity").value =
+          handleStyle.glowIntensity;
+        document.getElementById("glow-value").textContent =
+          handleStyle.glowIntensity;
+        document.getElementById("wireframe-thickness").value =
+          wireframeStyle.thickness;
+        document.getElementById(
+          "wireframe-value"
+        ).textContent = `${wireframeStyle.thickness}px`;
+        document.getElementById("anchor-thickness").value =
+          rotatorAnchor.thickness;
+        document.getElementById(
+          "thickness-value"
+        ).textContent = `${rotatorAnchor.thickness}px`;
+        document.getElementById("anchor-length").value =
+          rotatorAnchor.segmentLength;
+        document.getElementById("length-value").textContent =
+          rotatorAnchor.segmentLength;
+
+        console.log(`Applied ${preset} size preset:`, {
+          handleStyle,
+          wireframeStyle,
+          rotatorAnchor,
+        });
+      }
+
+      function updateHandleRadius(value) {
+        if (!transformer) {
+          console.warn("Transformer not yet initialized. Please wait...");
+          return;
+        }
+
+        const radius = parseFloat(value);
+        transformer.handleStyle = {
+          ...transformer.handleStyle,
+          radius: radius,
+        };
+
+        document.getElementById("radius-value").textContent = `${radius}px`;
+        console.log("Handle radius updated:", radius);
+      }
+
+      function updateOutlineThickness(value) {
+        if (!transformer) {
+          console.warn("Transformer not yet initialized. Please wait...");
+          return;
+        }
+
+        const thickness = parseFloat(value);
+        transformer.handleStyle = {
+          ...transformer.handleStyle,
+          outlineThickness: thickness,
+        };
+
+        document.getElementById("outline-value").textContent = `${thickness}px`;
+        console.log("Outline thickness updated:", thickness);
+      }
+
+      function updateGlowIntensity(value) {
+        if (!transformer) {
+          console.warn("Transformer not yet initialized. Please wait...");
+          return;
+        }
+
+        const intensity = parseFloat(value);
+        transformer.handleStyle = {
+          ...transformer.handleStyle,
+          glowIntensity: intensity,
+        };
+
+        document.getElementById("glow-value").textContent = intensity;
+        console.log("Glow intensity updated:", intensity);
+      }
+
+      function updateWireframeThickness(value) {
+        if (!transformer) {
+          console.warn("Transformer not yet initialized. Please wait...");
+          return;
+        }
+
+        const thickness = parseFloat(value);
+        transformer.wireframeStyle = {
+          ...transformer.wireframeStyle,
+          thickness: thickness,
+        };
+
+        document.getElementById(
+          "wireframe-value"
+        ).textContent = `${thickness}px`;
+        console.log("Wireframe thickness updated:", thickness);
       }
     </script>
   </body>

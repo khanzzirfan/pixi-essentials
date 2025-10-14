@@ -1,6 +1,6 @@
 {
   "name": "pixi-essentials-transformer-extended",
-  "version": "1.0.4",
+  "version": "1.0.7",
   "description": "Modern Canva-style transformer for PixiJS - Interactive display-object editor with beautiful handles (Extended version of @pixi-essentials/transformer)",
   "main": "lib/transformer.js",
   "module": "lib/transformer.es.js",

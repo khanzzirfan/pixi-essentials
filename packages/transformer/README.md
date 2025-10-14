@@ -203,6 +203,83 @@ app.stage.addChild(
 - **IntelliSense support** for better development experience
 - **Type-safe configuration** preventing runtime errors
 
+### Intelligent Scaling System
+
+- **Proportional scaling** for all handle elements (SVG icons, pill handles, glow effects)
+- **Dynamic rotator positioning** that maintains proper spacing with larger handles
+- **Scalable SVG icons** that remain crisp at any size
+- **Adaptive rotator anchor** positioning that adjusts based on handle size
+- **Consistent visual balance** across all scale factors
+
+## 📏 Handle Size Scaling
+
+The transformer intelligently scales all elements when you increase handle sizes:
+
+### Scaling Behavior
+
+```typescript
+// Example: 200% larger handles
+const transformer = new PIXI.Transformer({
+  handleStyle: {
+    radius: 14, // 200% of default 7px
+    outlineThickness: 5, // Scales proportionally
+    glowIntensity: 0.35, // Enhanced for larger handles
+  },
+  wireframeStyle: {
+    thickness: 4, // Scales with handle size
+  },
+  rotatorAnchor: {
+    thickness: 4, // Maintains visual balance
+    segmentLength: 0.012, // Slightly longer for larger handles
+  },
+});
+```
+
+### What Scales Automatically
+
+| Element                  | Scaling Behavior                                             |
+| ------------------------ | ------------------------------------------------------------ |
+| **SVG Rotator Icon**     | Scales proportionally with handle radius                     |
+| **Pill Handles**         | Width/height scale with radius (maintains aspect ratio)      |
+| **Glow Effects**         | Offset and intensity scale with handle size                  |
+| **Rotator Distance**     | Position scales to maintain proper spacing from bounding box |
+| **Anchor Line Position** | Adjusts start position based on handle size                  |
+
+### Size Presets
+
+```typescript
+// Small (Default) - 7px radius
+handleStyle: { radius: 7, outlineThickness: 2.5, glowIntensity: 0.15 }
+
+// Medium (150%) - 10px radius
+handleStyle: { radius: 10, outlineThickness: 3.5, glowIntensity: 0.25 }
+
+// Large (200%) - 14px radius
+handleStyle: { radius: 14, outlineThickness: 5, glowIntensity: 0.35 }
+
+// Extra Large (300%) - 21px radius
+handleStyle: { radius: 21, outlineThickness: 7.5, glowIntensity: 0.5 }
+```
+
+### Real-time Scaling
+
+All scaling happens in real-time without recreating the transformer:
+
+```typescript
+// Dynamically increase handle size
+transformer.handleStyle = {
+  radius: 33, // Large handles
+  outlineThickness: 10.5,
+  glowIntensity: 0.5,
+};
+
+// Rotator anchor automatically adjusts
+transformer.rotatorAnchor = {
+  thickness: 9, // Proportional to wireframe
+  segmentLength: 0.024, // Longer for larger handles
+};
+```
+
 ## External Resources
 
 - (Initial release) [Vector rendering of SVG content with PixiJS](https://medium.com/javascript-in-plain-english/vector-rendering-of-svg-content-with-pixijs-6f26c91f09ee?source=friends_link&sk=1faf7f354ab39bd79d476bf33e9d44d1)

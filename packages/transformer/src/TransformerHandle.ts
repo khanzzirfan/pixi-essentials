@@ -1,7 +1,7 @@
 import { Graphics } from "@pixi/graphics";
 import { Point } from "@pixi/math";
-import { Renderer } from "@pixi/core";
-import { Sprite, Texture, SVGResource } from "@pixi/sprite";
+import { Renderer, Texture } from "@pixi/core";
+import { Sprite } from "@pixi/sprite";
 
 import type { Container } from "@pixi/display";
 import type { Handle, Transformer } from "./Transformer";
@@ -33,6 +33,9 @@ export interface ITransformerHandleStyle {
 
   /** Glow intensity for the handle */
   glowIntensity?: number;
+
+  /** Optional explicit color for the rotator SVG icon (overrides outlineColor) */
+  rotatorIconColor?: number;
 }
 
 /**
@@ -55,12 +58,19 @@ const Graphics_ = Graphics as unknown as {
 };
 
 /**
- * Create rotator SVG as a data URL - using your exact smaller design
+ * Create rotator SVG as a data URL - scalable version that adapts to handle size
  */
-function createRotatorSVG(color: string = "#6366f1"): string {
+function createRotatorSVG(
+  color: string = "#6366f1",
+  size: number = 28
+): string {
+  // Scale the SVG based on handle size, but keep it proportional
+  const scale = Math.max(1, size / 28); // Minimum scale of 1
+  const svgSize = Math.round(24 * scale); // Base size is 24, scale it
+
   return `data:image/svg+xml;base64,${btoa(
     `
-<svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none">
+<svg xmlns="http://www.w3.org/2000/svg" width="${svgSize}" height="${svgSize}" viewBox="0 0 24 24" fill="none">
   <path fill-rule="evenodd" clip-rule="evenodd" d="M22 12C22 17.5228 17.5228 22 12 22C6.47715 22 2 17.5228 2 12C2 6.47715 6.47715 2 12 2C17.5228 2 22 6.47715 22 12ZM5.46056 11.0833C5.83331 7.79988 8.62404 5.25 12.0096 5.25C14.148 5.25 16.0489 6.26793 17.2521 7.84246C17.5036 8.17158 17.4406 8.64227 17.1115 8.89376C16.7824 9.14526 16.3117 9.08233 16.0602 8.7532C15.1289 7.53445 13.6613 6.75 12.0096 6.75C9.45213 6.75 7.33639 8.63219 6.9733 11.0833H7.33652C7.63996 11.0833 7.9135 11.2662 8.02953 11.5466C8.14556 11.8269 8.0812 12.1496 7.86649 12.364L6.69823 13.5307C6.40542 13.8231 5.9311 13.8231 5.63829 13.5307L4.47003 12.364C4.25532 12.1496 4.19097 11.8269 4.30699 11.5466C4.42302 11.2662 4.69656 11.0833 5 11.0833H5.46056ZM18.3617 10.4693C18.0689 10.1769 17.5946 10.1769 17.3018 10.4693L16.1335 11.636C15.9188 11.8504 15.8545 12.1731 15.9705 12.4534C16.0865 12.7338 16.3601 12.9167 16.6635 12.9167H17.0267C16.6636 15.3678 14.5479 17.25 11.9905 17.25C10.3464 17.25 8.88484 16.4729 7.9529 15.2638C7.70002 14.9358 7.22908 14.8748 6.90101 15.1277C6.57295 15.3806 6.512 15.8515 6.76487 16.1796C7.96886 17.7416 9.86205 18.75 11.9905 18.75C15.376 18.75 18.1667 16.2001 18.5395 12.9167H19C19.3035 12.9167 19.577 12.7338 19.693 12.4534C19.8091 12.1731 19.7447 11.8504 19.53 11.636L18.3617 10.4693Z" fill="${color}"/>
 </svg>
   `.trim()
@@ -210,15 +220,19 @@ export class TransformerHandle extends Graphics_ {
     isPill: boolean
   ): void {
     const glowSteps = 3;
+    const baseRadius = style.radius || 7;
+    const scaleFactor = baseRadius / 7; // Scale relative to default 7px radius
 
     if (isPill) {
-      const width = 10;
-      const height = 20;
-      const radius = 5;
+      // Scale pill dimensions based on handle radius
+      const width = 10 * scaleFactor;
+      const height = 20 * scaleFactor;
+      const radius = 5 * scaleFactor;
+      const glowOffset = 2 * scaleFactor;
 
       for (let i = 0; i < glowSteps; i++) {
         const alpha = (style.glowIntensity || 0.15) * (1 - i / glowSteps) * 0.3;
-        const offset = i * 2;
+        const offset = i * glowOffset;
 
         this.beginFill(style.glowColor || 0x6366f1, alpha)
           .drawRoundedRect(
@@ -231,12 +245,12 @@ export class TransformerHandle extends Graphics_ {
           .endFill();
       }
     } else {
-      const glowRadius = (style.radius || 7) * 1.5;
+      const glowRadius = baseRadius * 1.5;
 
       for (let i = 0; i < glowSteps; i++) {
         const alpha = (style.glowIntensity || 0.15) * (1 - i / glowSteps) * 0.3;
         const currentRadius =
-          style.radius + (glowRadius - style.radius) * (i / glowSteps);
+          baseRadius + (glowRadius - baseRadius) * (i / glowSteps);
 
         this.beginFill(style.glowColor || 0x6366f1, alpha)
           .drawCircle(0, 0, currentRadius)
@@ -265,13 +279,16 @@ export class TransformerHandle extends Graphics_ {
    * Draws pill-shaped handle for middle handles
    */
   private drawPillHandle(handle: Handle, style: ITransformerHandleStyle): void {
+    const baseRadius = style.radius || 7;
+    const scaleFactor = baseRadius / 7; // Scale relative to default 7px radius
+
     const isVertical = handle === "topCenter" || handle === "bottomCenter";
-    const width = isVertical ? 20 : 10;
-    const height = isVertical ? 10 : 20;
-    const radius = 5;
+    const width = (isVertical ? 20 : 10) * scaleFactor;
+    const height = (isVertical ? 10 : 20) * scaleFactor;
+    const radius = 5 * scaleFactor;
 
     // Draw white rounded rectangle
-    this.beginFill(0xffffff)
+    this.beginFill(style.color || 0xffffff)
       .drawRoundedRect(-width / 2, -height / 2, width, height, radius)
       .endFill();
 
@@ -293,12 +310,20 @@ export class TransformerHandle extends Graphics_ {
       this._rotatorSprite = null;
     }
 
-    // Convert color to hex string
-    const colorHex =
-      "#" + (style.outlineColor || 0x6366f1).toString(16).padStart(6, "0");
+    // Determine icon color (explicit override > outlineColor > default)
+    const iconColor =
+      style.rotatorIconColor !== undefined
+        ? style.rotatorIconColor
+        : style.outlineColor || 0x6366f1;
+    const colorHex = "#" + iconColor.toString(16).padStart(6, "0");
 
-    // Create SVG data URL
-    const svgDataUrl = createRotatorSVG(colorHex);
+    // Calculate sprite size based on handle radius
+    const baseRadius = style.radius || 7;
+    const scaleFactor = baseRadius / 7; // Scale relative to default 7px radius
+    const spriteSize = Math.round(28 * scaleFactor); // Scale the 28px base size
+
+    // Create SVG data URL with scaled size
+    const svgDataUrl = createRotatorSVG(colorHex, spriteSize);
 
     // Create texture from SVG
     const texture = Texture.from(svgDataUrl);
@@ -306,8 +331,8 @@ export class TransformerHandle extends Graphics_ {
     // Create sprite
     this._rotatorSprite = new Sprite(texture);
     this._rotatorSprite.anchor.set(0.5, 0.5);
-    this._rotatorSprite.width = 28;
-    this._rotatorSprite.height = 28;
+    this._rotatorSprite.width = spriteSize;
+    this._rotatorSprite.height = spriteSize;
 
     this.addChild(this._rotatorSprite);
   }
