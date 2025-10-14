@@ -221,6 +221,10 @@ export interface ITransformerColorTheme {
   glow?: number;
   /** Glow intensity (0-1) */
   glowIntensity?: number;
+  /** Background color for rotator handle (SVG circle) */
+  rotatorBackground?: string;
+  /** Arrow color for rotator handle (SVG paths) */
+  rotatorArrow?: string;
 }
 
 /**
@@ -959,16 +963,14 @@ export class Transformer extends Container_ {
   private redrawAllHandles(): void {
     Object.values(this.handles).forEach((handle) => {
       if (handle) {
-        // Update the handle's style with new colors
-        handle._style = {
-          ...handle._style,
+        // Update the handle's style with new colors using public API
+        handle.style = {
+          ...handle.style,
           outlineColor: this._colorTheme.primary,
           glowColor: this._colorTheme.glow,
           glowIntensity: this._colorTheme.glowIntensity,
         };
-        // Force redraw
-        handle._dirty = true;
-        handle.draw();
+        // Force redraw by setting the style (this triggers _dirty = true internally)
       }
     });
   }
