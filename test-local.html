@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Transformer Test</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+      }
+      #pen-canvas {
+        border: 1px solid #ccc;
+      }
+
+      .theme-btn {
+        padding: 8px 16px;
+        border: 2px solid #ddd;
+        border-radius: 6px;
+        background: white;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        font-weight: 500;
+      }
+
+      .theme-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .theme-btn.active {
+        border-color: #6366f1;
+        background: #6366f1;
+        color: white;
+        box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+      }
+
+      .theme-btn[data-color="0x6366f1"] {
+        border-left: 4px solid #6366f1;
+      }
+      .theme-btn[data-color="0xff6b6b"] {
+        border-left: 4px solid #ff6b6b;
+      }
+      .theme-btn[data-color="0x45b7d1"] {
+        border-left: 4px solid #45b7d1;
+      }
+      .theme-btn[data-color="0x4ecdc4"] {
+        border-left: 4px solid #4ecdc4;
+      }
+      .theme-btn[data-color="0x2ecc71"] {
+        border-left: 4px solid #2ecc71;
+      }
+      .theme-btn[data-color="0x6c5ce7"] {
+        border-left: 4px solid #6c5ce7;
+      }
+      .theme-btn[data-color="0xf0932b"] {
+        border-left: 4px solid #f0932b;
+      }
+      .theme-btn[data-color="0xeb4d4b"] {
+        border-left: 4px solid #eb4d4b;
+      }
+      .theme-btn[data-color="0xf9ca24"] {
+        border-left: 4px solid #f9ca24;
+      }
+      .theme-btn[data-color="0x44aaff"] {
+        border-left: 4px solid #44aaff;
+      }
+
+      .theme-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none !important;
+        box-shadow: none !important;
+      }
+
+      /* Rotator Anchor Controls */
+      .controls-section {
+        background: #f8f9fa;
+        border: 1px solid #e9ecef;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+
+      .controls-section h3 {
+        margin: 0 0 15px 0;
+        color: #495057;
+        font-size: 18px;
+      }
+
+      .controls-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 15px;
+      }
+
+      .control-group {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .control-group label {
+        font-weight: 600;
+        color: #495057;
+        font-size: 14px;
+      }
+
+      .style-btn,
+      .preset-btn,
+      .toggle-btn {
+        padding: 8px 12px;
+        border: 1px solid #dee2e6;
+        border-radius: 4px;
+        background: #fff;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.2s;
+        margin-right: 5px;
+        margin-bottom: 5px;
+      }
+
+      .style-btn:hover,
+      .preset-btn:hover,
+      .toggle-btn:hover {
+        background: #e9ecef;
+        border-color: #adb5bd;
+      }
+
+      .style-btn.active {
+        background: #6366f1;
+        color: white;
+        border-color: #6366f1;
+      }
+
+      .toggle-btn.enabled {
+        background: #28a745;
+        color: white;
+        border-color: #28a745;
+      }
+
+      .toggle-btn.disabled {
+        background: #dc3545;
+        color: white;
+        border-color: #dc3545;
+      }
+
+      input[type="range"] {
+        width: 100%;
+        margin: 5px 0;
+      }
+
+      .pattern-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+
+      .pattern-controls input[type="range"] {
+        width: 80px;
+        margin: 0;
+      }
+
+      .pattern-controls span {
+        font-size: 12px;
+        color: #6c757d;
+        min-width: 30px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Modern Canva-Style Transformer Test</h1>
+
+    <!-- Theme Switcher -->
+    <div style="margin-bottom: 20px">
+      <h3>
+        🎨 Color Themes
+        <span id="status" style="font-size: 12px; color: #666"
+          >(Loading...)</span
+        >
+      </h3>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap" id="theme-buttons">
+        <button
+          onclick="switchTheme('default')"
+          class="theme-btn"
+          data-color="0x6366f1"
+          disabled
+        >
+          Indigo (Default)
+        </button>
+        <button
+          onclick="switchTheme('red')"
+          class="theme-btn"
+          data-color="0xff6b6b"
+          disabled
+        >
+          Red
+        </button>
+        <button
+          onclick="switchTheme('blue')"
+          class="theme-btn"
+          data-color="0x45b7d1"
+          disabled
+        >
+          Blue
+        </button>
+        <button
+          onclick="switchTheme('teal')"
+          class="theme-btn"
+          data-color="0x4ecdc4"
+          disabled
+        >
+          Teal
+        </button>
+        <button
+          onclick="switchTheme('green')"
+          class="theme-btn"
+          data-color="0x2ecc71"
+          disabled
+        >
+          Green
+        </button>
+        <button
+          onclick="switchTheme('purple')"
+          class="theme-btn"
+          data-color="0x6c5ce7"
+          disabled
+        >
+          Purple
+        </button>
+        <button
+          onclick="switchTheme('orange')"
+          class="theme-btn"
+          data-color="0xf0932b"
+          disabled
+        >
+          Orange
+        </button>
+        <button
+          onclick="switchTheme('pink')"
+          class="theme-btn"
+          data-color="0xeb4d4b"
+          disabled
+        >
+          Pink
+        </button>
+        <button
+          onclick="switchTheme('yellow')"
+          class="theme-btn"
+          data-color="0xf9ca24"
+          disabled
+        >
+          Yellow
+        </button>
+        <button
+          onclick="switchTheme('cyan')"
+          class="theme-btn"
+          data-color="0x44aaff"
+          disabled
+        >
+          Cyan
+        </button>
+      </div>
+    </div>
+
+    <!-- Rotator Anchor Controls -->
+    <div class="controls-section">
+      <h3>🎯 Rotator Anchor Configuration</h3>
+      <div class="controls-grid">
+        <!-- Enable/Disable -->
+        <div class="control-group">
+          <label>Enabled:</label>
+          <button
+            onclick="toggleRotatorAnchor()"
+            class="toggle-btn"
+            id="anchor-enabled"
+          >
+            Enabled
+          </button>
+        </div>
+
+        <!-- Style Selection -->
+        <div class="control-group">
+          <label>Style:</label>
+          <button
+            onclick="setAnchorStyle('solid')"
+            class="style-btn active"
+            data-style="solid"
+          >
+            Solid
+          </button>
+          <button
+            onclick="setAnchorStyle('dashed')"
+            class="style-btn"
+            data-style="dashed"
+          >
+            Dashed
+          </button>
+          <button
+            onclick="setAnchorStyle('dotted')"
+            class="style-btn"
+            data-style="dotted"
+          >
+            Dotted
+          </button>
+        </div>
+
+        <!-- Position Controls -->
+        <div class="control-group">
+          <label>Start Position:</label>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.05"
+            value="0.45"
+            oninput="updateAnchorPosition(this.value)"
+            id="anchor-position"
+          />
+          <span id="position-value">0.45</span>
+        </div>
+
+        <div class="control-group">
+          <label>Segment Length:</label>
+          <input
+            type="range"
+            min="0.001"
+            max="0.2"
+            step="0.001"
+            value="0.005"
+            oninput="updateAnchorLength(this.value)"
+            id="anchor-length"
+          />
+          <span id="length-value">0.005</span>
+        </div>
+
+        <!-- Thickness Control -->
+        <div class="control-group">
+          <label>Thickness:</label>
+          <input
+            type="range"
+            min="1"
+            max="10"
+            step="0.5"
+            value="2"
+            oninput="updateAnchorThickness(this.value)"
+            id="anchor-thickness"
+          />
+          <span id="thickness-value">2</span>
+        </div>
+
+        <!-- Pattern Controls -->
+        <div
+          class="control-group"
+          id="dash-pattern-controls"
+          style="display: none"
+        >
+          <label>Dash Pattern:</label>
+          <div class="pattern-controls">
+            <span>Dash: </span>
+            <input
+              type="range"
+              min="2"
+              max="20"
+              value="8"
+              oninput="updateDashPattern()"
+              id="dash-length"
+            />
+            <span id="dash-length-value">8</span>
+            <span>Gap: </span>
+            <input
+              type="range"
+              min="2"
+              max="20"
+              value="4"
+              oninput="updateDashPattern()"
+              id="gap-length"
+            />
+            <span id="gap-length-value">4</span>
+          </div>
+        </div>
+
+        <div
+          class="control-group"
+          id="dot-pattern-controls"
+          style="display: none"
+        >
+          <label>Dot Pattern:</label>
+          <div class="pattern-controls">
+            <span>Size: </span>
+            <input
+              type="range"
+              min="1"
+              max="8"
+              value="2"
+              oninput="updateDotPattern()"
+              id="dot-size"
+            />
+            <span id="dot-size-value">2</span>
+            <span>Gap: </span>
+            <input
+              type="range"
+              min="2"
+              max="15"
+              value="4"
+              oninput="updateDotPattern()"
+              id="dot-gap"
+            />
+            <span id="dot-gap-value">4</span>
+          </div>
+        </div>
+
+        <!-- Preset Buttons -->
+        <div class="control-group">
+          <label>Presets:</label>
+          <button onclick="applyAnchorPreset('default')" class="preset-btn">
+            Default
+          </button>
+          <button onclick="applyAnchorPreset('long')" class="preset-btn">
+            Long Line
+          </button>
+          <button onclick="applyAnchorPreset('short')" class="preset-btn">
+            Short Line
+          </button>
+          <button onclick="applyAnchorPreset('close')" class="preset-btn">
+            Close to Box
+          </button>
+          <button onclick="applyAnchorPreset('far')" class="preset-btn">
+            Far from Box
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <canvas id="pen-canvas"></canvas>
+
+    <!-- CodePen-style imports -->
+    <script src="https://pixijs.download/v7.2.4/pixi.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@pixi/graphics-extras@7.1.4/dist/graphics-extras.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@pixi-essentials/object-pool@1.0.1/dist/pixi-object-pool.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@pixi-essentials/bounds@3.0.0/dist/bounds.js"></script>
+
+    <!-- Your local transformer package -->
+    <script src="packages/transformer/dist/transformer.js"></script>
+
+    <!-- Fallback: Use published version if local doesn't work -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/pixi-essentials-transformer-extended@1.0.2/dist/transformer.js"></script> -->
+
+    <script>
+      const app = new PIXI.Application({
+        width: 1024,
+        height: 1024,
+        autoDensity: true,
+        resolution: window.devicePixelRatio || 1,
+        view: document.getElementById("pen-canvas"),
+        backgroundColor: 0xffffff,
+        antialias: true,
+      });
+
+      app.stage.interactive = true;
+      app.stage.eventMode = "static";
+
+      const circle = app.stage.addChild(new PIXI.Graphics());
+
+      circle.beginFill(0xfedbac).drawCircle(0, 0, 100).endFill();
+      circle.pivot.set(50, 100);
+      circle.scale.set(1);
+      circle.position.set(300, 300);
+
+      const star = app.stage.addChild(new PIXI.Graphics());
+
+      star.beginFill(0xfedbac).drawStar(0, 0, 8, 100).endFill();
+      star.position.set(800, 500);
+      star.pivot.set(50, 100);
+
+      const starText = star.addChild(
+        new PIXI.Text("Hello world!", {
+          fontSize: 12,
+        })
+      );
+
+      starText.x = -30;
+
+      // Global transformer reference
+      let transformer = null;
+
+      // Initialize SVG textures for rotator handles
+      if (PIXI.TransformerHandle && PIXI.TransformerHandle.loadTextures) {
+        PIXI.TransformerHandle.loadTextures()
+          .then(() => {
+            console.log("SVG textures loaded successfully!");
+            createTransformer();
+          })
+          .catch((error) => {
+            console.warn("SVG texture loading failed, using fallback:", error);
+            createTransformer();
+          });
+      } else {
+        console.warn(
+          "TransformerHandle not found, creating transformer without SVG"
+        );
+        createTransformer();
+      }
+
+      function createTransformer() {
+        transformer = app.stage.addChild(
+          new PIXI.Transformer({
+            rotateEnabled: true,
+            boxRotationEnabled: true,
+            transientGroupTilt: false,
+            group: [star, circle],
+            stage: app.stage,
+            wireframeStyle: {
+              thickness: 1,
+              color: 0xff0000,
+            },
+            // Default indigo theme
+            colorTheme: {
+              primary: 0x6366f1,
+              secondary: 0x4f46e5,
+              background: 0xffffff,
+              glow: 0x6366f1,
+              glowIntensity: 0.15,
+            },
+          })
+        );
+        console.log("Transformer created:", transformer);
+
+        // Enable all theme buttons
+        document.querySelectorAll(".theme-btn").forEach((btn) => {
+          btn.disabled = false;
+        });
+
+        // Set default button as active
+        document
+          .querySelector('[data-color="0x6366f1"]')
+          .classList.add("active");
+
+        // Update status
+        document.getElementById("status").textContent = "(Ready!)";
+        document.getElementById("status").style.color = "#2ecc71";
+      }
+
+      // Theme definitions
+      const themes = {
+        default: {
+          primary: 0x6366f1,
+          secondary: 0x4f46e5,
+          glow: 0x6366f1,
+        },
+        red: {
+          primary: 0xff6b6b,
+          secondary: 0xe74c3c,
+          glow: 0xff6b6b,
+        },
+        blue: {
+          primary: 0x45b7d1,
+          secondary: 0x3498db,
+          glow: 0x45b7d1,
+        },
+        teal: {
+          primary: 0x4ecdc4,
+          secondary: 0x26d0ce,
+          glow: 0x4ecdc4,
+        },
+        green: {
+          primary: 0x2ecc71,
+          secondary: 0x27ae60,
+          glow: 0x2ecc71,
+        },
+        purple: {
+          primary: 0x6c5ce7,
+          secondary: 0x5f3dc4,
+          glow: 0x6c5ce7,
+        },
+        orange: {
+          primary: 0xf0932b,
+          secondary: 0xe67e22,
+          glow: 0xf0932b,
+        },
+        pink: {
+          primary: 0xeb4d4b,
+          secondary: 0xc0392b,
+          glow: 0xeb4d4b,
+        },
+        yellow: {
+          primary: 0xf9ca24,
+          secondary: 0xf39c12,
+          glow: 0xf9ca24,
+        },
+        cyan: {
+          primary: 0x44aaff,
+          secondary: 0x3498db,
+          glow: 0x44aaff,
+        },
+      };
+
+      // Theme switching function
+      function switchTheme(themeName) {
+        if (!transformer) {
+          console.warn("Transformer not yet initialized. Please wait...");
+          return;
+        }
+
+        const theme = themes[themeName];
+        if (!theme) {
+          console.error(`Theme '${themeName}' not found`);
+          return;
+        }
+
+        // Update transformer colors
+        transformer.colorTheme = {
+          ...theme,
+          background: 0xffffff,
+          glowIntensity: 0.15,
+        };
+
+        // Update button states
+        document.querySelectorAll(".theme-btn").forEach((btn) => {
+          btn.classList.remove("active");
+        });
+
+        const activeButton = document.querySelector(
+          `[data-color="0x${theme.primary.toString(16)}"]`
+        );
+        if (activeButton) {
+          activeButton.classList.add("active");
+        }
+
+        console.log(`Switched to ${themeName} theme:`, theme);
+      }
+
+      // Rotator Anchor Control Functions
+      function toggleRotatorAnchor() {
+        if (!transformer) {
+          console.warn("Transformer not yet initialized. Please wait...");
+          return;
+        }
+
+        const currentConfig = transformer.rotatorAnchor;
+        const newConfig = {
+          ...currentConfig,
+          enabled: !currentConfig.enabled,
+        };
+
+        transformer.rotatorAnchor = newConfig;
+
+        const button = document.getElementById("anchor-enabled");
+        if (newConfig.enabled) {
+          button.textContent = "Enabled";
+          button.className = "toggle-btn enabled";
+        } else {
+          button.textContent = "Disabled";
+          button.className = "toggle-btn disabled";
+        }
+
+        console.log("Rotator anchor toggled:", newConfig);
+      }
+
+      function setAnchorStyle(style) {
+        if (!transformer) {
+          console.warn("Transformer not yet initialized. Please wait...");
+          return;
+        }
+
+        const currentConfig = transformer.rotatorAnchor;
+        const newConfig = {
+          ...currentConfig,
+          style: style,
+        };
+
+        transformer.rotatorAnchor = newConfig;
+
+        // Update button states
+        document.querySelectorAll(".style-btn").forEach((btn) => {
+          btn.classList.remove("active");
+        });
+        document
+          .querySelector(`[data-style="${style}"]`)
+          .classList.add("active");
+
+        // Show/hide pattern controls
+        document.getElementById("dash-pattern-controls").style.display =
+          style === "dashed" ? "block" : "none";
+        document.getElementById("dot-pattern-controls").style.display =
+          style === "dotted" ? "block" : "none";
+
+        console.log("Anchor style changed to:", style);
+      }
+
+      function updateAnchorPosition(value) {
+        if (!transformer) {
+          console.warn("Transformer not yet initialized. Please wait...");
+          return;
+        }
+
+        const currentConfig = transformer.rotatorAnchor;
+        const newConfig = {
+          ...currentConfig,
+          startPosition: parseFloat(value),
+        };
+
+        transformer.rotatorAnchor = newConfig;
+        document.getElementById("position-value").textContent = value;
+
+        console.log("Anchor position updated:", value);
+      }
+
+      function updateAnchorLength(value) {
+        if (!transformer) {
+          console.warn("Transformer not yet initialized. Please wait...");
+          return;
+        }
+
+        const currentConfig = transformer.rotatorAnchor;
+        const newConfig = {
+          ...currentConfig,
+          segmentLength: parseFloat(value),
+        };
+
+        transformer.rotatorAnchor = newConfig;
+        document.getElementById("length-value").textContent = value;
+
+        console.log("Anchor length updated:", value);
+      }
+
+      function updateAnchorThickness(value) {
+        if (!transformer) {
+          console.warn("Transformer not yet initialized. Please wait...");
+          return;
+        }
+
+        const currentConfig = transformer.rotatorAnchor;
+        const newConfig = {
+          ...currentConfig,
+          thickness: parseFloat(value),
+        };
+
+        transformer.rotatorAnchor = newConfig;
+        document.getElementById("thickness-value").textContent = value;
+
+        console.log("Anchor thickness updated:", value);
+      }
+
+      function updateDashPattern() {
+        if (!transformer) {
+          console.warn("Transformer not yet initialized. Please wait...");
+          return;
+        }
+
+        const dashLength = parseFloat(
+          document.getElementById("dash-length").value
+        );
+        const gapLength = parseFloat(
+          document.getElementById("gap-length").value
+        );
+
+        document.getElementById("dash-length-value").textContent = dashLength;
+        document.getElementById("gap-length-value").textContent = gapLength;
+
+        const currentConfig = transformer.rotatorAnchor;
+        const newConfig = {
+          ...currentConfig,
+          dashPattern: [dashLength, gapLength],
+        };
+
+        transformer.rotatorAnchor = newConfig;
+
+        console.log("Dash pattern updated:", [dashLength, gapLength]);
+      }
+
+      function updateDotPattern() {
+        if (!transformer) {
+          console.warn("Transformer not yet initialized. Please wait...");
+          return;
+        }
+
+        const dotSize = parseFloat(document.getElementById("dot-size").value);
+        const dotGap = parseFloat(document.getElementById("dot-gap").value);
+
+        document.getElementById("dot-size-value").textContent = dotSize;
+        document.getElementById("dot-gap-value").textContent = dotGap;
+
+        const currentConfig = transformer.rotatorAnchor;
+        const newConfig = {
+          ...currentConfig,
+          dotPattern: [dotSize, dotGap],
+        };
+
+        transformer.rotatorAnchor = newConfig;
+
+        console.log("Dot pattern updated:", [dotSize, dotGap]);
+      }
+
+      function applyAnchorPreset(preset) {
+        if (!transformer) {
+          console.warn("Transformer not yet initialized. Please wait...");
+          return;
+        }
+
+        let newConfig = { ...transformer.rotatorAnchor };
+
+        switch (preset) {
+          case "default":
+            newConfig = {
+              enabled: true,
+              startPosition: 0.45,
+              segmentLength: 0.005,
+              thickness: 2,
+              style: "solid",
+            };
+            break;
+          case "long":
+            newConfig = {
+              ...newConfig,
+              startPosition: 0.3,
+              segmentLength: 0.08,
+              style: "solid",
+            };
+            break;
+          case "short":
+            newConfig = {
+              ...newConfig,
+              startPosition: 0.4,
+              segmentLength: 0.002,
+              style: "solid",
+            };
+            break;
+          case "close":
+            newConfig = {
+              ...newConfig,
+              startPosition: 0.2,
+              segmentLength: 0.01,
+              style: "solid",
+            };
+            break;
+          case "far":
+            newConfig = {
+              ...newConfig,
+              startPosition: 0.6,
+              segmentLength: 0.01,
+              style: "solid",
+            };
+            break;
+        }
+
+        transformer.rotatorAnchor = newConfig;
+
+        // Update UI controls
+        document.getElementById("anchor-position").value =
+          newConfig.startPosition;
+        document.getElementById("position-value").textContent =
+          newConfig.startPosition;
+        document.getElementById("anchor-length").value =
+          newConfig.segmentLength;
+        document.getElementById("length-value").textContent =
+          newConfig.segmentLength;
+        document.getElementById("anchor-thickness").value = newConfig.thickness;
+        document.getElementById("thickness-value").textContent =
+          newConfig.thickness;
+
+        // Update style buttons
+        setAnchorStyle(newConfig.style);
+
+        console.log(`Applied ${preset} preset:`, newConfig);
+      }
+    </script>
+  </body>
+</html>

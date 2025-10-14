@@ -1,30 +1,43 @@
 {
-  "name": "@pixi-essentials/transformer",
-  "version": "3.0.4",
-  "description": "Interactive display-object to edit the transformation matrices of display-objects",
+  "name": "pixi-essentials-transformer-extended",
+  "version": "1.0.4",
+  "description": "Modern Canva-style transformer for PixiJS - Interactive display-object editor with beautiful handles (Extended version of @pixi-essentials/transformer)",
   "main": "lib/transformer.js",
   "module": "lib/transformer.es.js",
   "bundle": "dist/transformer.js",
   "types": "./index.d.ts",
   "scripts": {
     "build": "rollup -c node_modules/@pixi-build-tools/rollup-configurator/index.js --silent",
-    "build:types": "rm -rf compile && tsc && api-extractor run"
+    "build:types": "rm -rf compile && tsc",
+    "publish:package": "npm run build && npm publish"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SukantPal/pixi-essentials.git"
+    "url": "git+https://github.com/khanzzirfan/pixi-essentials.git"
   },
   "keywords": [
     "pixijs",
-    "transfomer",
-    "konva-transformer"
+    "pixi",
+    "transformer",
+    "konva-transformer",
+    "canva-style",
+    "modern-handles",
+    "interactive",
+    "pixi-essentials",
+    "handles",
+    "rotation",
+    "scaling",
+    "pill-handles"
   ],
-  "author": "Shukant K. Pal <shukantpal@outlook.com>",
+  "author": "Irfan Khan (khanzzirfan) - Modern Canva-style upgrade",
+  "contributors": [
+    "Shukant K. Pal <shukantpal@outlook.com> (Original author)"
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/SukantPal/pixi-essentials/issues"
+    "url": "https://github.com/khanzzirfan/pixi-essentials/issues"
   },
-  "homepage": "https://github.com/SukantPal/pixi-essentials#readme",
+  "homepage": "https://github.com/khanzzirfan/pixi-essentials#readme",
   "files": [
     "lib",
     "dist",
