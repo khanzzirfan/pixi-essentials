@@ -1,36 +1,35 @@
 {
-    "compilerOptions": {
-        "target": "es2020",
-        "allowJs": true,
-        "sourceMap": true,
-        "removeComments": false,
-        "strict": true,
-        "noImplicitAny": false,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
-        "noImplicitReturns": true,
-        "strictNullChecks": false,
-        "esModuleInterop": true,
-        "moduleResolution": "node",
-        "baseUrl": "./",
-        "paths": {
-            "@pixi-essentials/*": [
-                "packages/*/src"
-            ],
-        },
-        "outDir": "./compile",
-        "declaration": true,
-        "declarationMap": true,
-        "allowSyntheticDefaultImports": true
+  "compilerOptions": {
+    "target": "es2020",
+    "allowJs": true,
+    "sourceMap": true,
+    "removeComments": false,
+    "strict": true,
+    "noImplicitAny": false,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "strictNullChecks": false,
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "skipLibCheck": true,
+    "baseUrl": "./",
+    "paths": {
+      "@pixi-essentials/*": ["packages/*/src"]
     },
-    "exclude": [
-        "node_modules",
-        "**/dist/**",
-        "**/lib/**",
-        "**/test/**",
-        "**/scripts/**",
-        "**/types/**",
-        "bundles/**/*.d.ts",
-        "rollup.config.js"
-    ]
+    "outDir": "./compile",
+    "declaration": true,
+    "declarationMap": true,
+    "allowSyntheticDefaultImports": true
+  },
+  "exclude": [
+    "node_modules",
+    "**/dist/**",
+    "**/lib/**",
+    "**/test/**",
+    "**/scripts/**",
+    "**/types/**",
+    "bundles/**/*.d.ts",
+    "rollup.config.js"
+  ]
 }

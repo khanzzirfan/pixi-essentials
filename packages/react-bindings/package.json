@@ -1,44 +1,50 @@
 {
-  "name": "@pixi-essentials/react-bindings",
-  "version": "3.0.0",
-  "description": "React components for display-objects provided by pixi-essentials, for usage with @pixi/react.",
+  "name": "pixi-essentials-react-bindings-extended",
+  "version": "1.0.0-alpha.5",
+  "description": "React components for display-objects provided by pixi-essentials-transformer-extended, for usage with @pixi/react. Modern Canva-style transformer with enhanced features.",
   "main": "lib/react-bindings.js",
   "module": "lib/react-bindings.es.js",
   "bundle": "dist/react-bindings.js",
   "types": "./index.d.ts",
   "namespace": "ReactPixi",
   "scripts": {
-    "build": "rollup -c node_modules/@pixi-build-tools/rollup-configurator/index.js --silent"
+    "build": "rollup -c node_modules/@pixi-build-tools/rollup-configurator/index.js --silent",
+    "publish:package": "npm run build && npm publish"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SukantPal/pixi-essentials.git"
+    "url": "git+https://github.com/khanzzirfan/pixi-essentials.git"
   },
   "keywords": [
     "pixijs",
     "react-pixi",
     "reactjs",
-    "pixi-essentials"
+    "pixi-essentials",
+    "transformer",
+    "canva-style",
+    "modern-ui"
   ],
-  "author": "Shukant K. Pal <shukantpal@outlook.com>",
+  "author": "Irfan Khan (khanzzirfan) - Modern Canva-style upgrade",
+  "contributors": [
+    "Shukant K. Pal <shukantpal@outlook.com> (Original author)"
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/SukantPal/pixi-essentials/issues"
+    "url": "https://github.com/khanzzirfan/pixi-essentials/issues"
   },
-  "homepage": "https://github.com/SukantPal/pixi-essentials#readme",
+  "homepage": "https://github.com/khanzzirfan/pixi-essentials#readme",
   "files": [
     "lib",
     "dist",
     "index.d.ts"
   ],
-  "dependencies": {
-    "@pixi-essentials/transformer": "^3.0.4"
-  },
+  "dependencies": {},
   "peerDependencies": {
     "@pixi/display": "^7.0.0",
     "@pixi/math": "^7.0.0",
     "@pixi/react": "^7.0.0",
-    "react": ">=17.0.0"
+    "react": ">=17.0.0",
+    "pixi-essentials-transformer-extended": "^1.0.7"
   },
   "devDependencies": {
     "@pixi/react": "^7.0.0",
@@ -48,6 +54,7 @@
     "typescript": "~5.3.3",
     "eslint": "~7.7.0",
     "@pixi-essentials/eslint-config": "~1.0.0",
-    "rollup": "~2.27.0"
+    "rollup": "~2.27.0",
+    "pixi-essentials-transformer-extended": "^1.0.7"
   }
 }

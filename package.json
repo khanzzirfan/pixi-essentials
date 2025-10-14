@@ -1,33 +1,39 @@
 {
   "name": "pixi-essentials",
   "version": "1.0.0",
-  "description": "Essential plugins for PixiJS applications",
+  "description": "Essential plugins for PixiJS applications - Fork with modern Canva-style transformer",
   "main": "index.js",
   "scripts": {
     "prepare": "rush install",
     "build:compile": "rush build",
     "build:types": "rush build:types",
-    "build": "npm run build:compile; npm run build:types",
+    "build": "npm run build:compile && npm run build:types",
     "prepublishOnly": "npm run build",
-    "test": "cd ./tools/unit-tests && pnpm test && cd ../.."
+    "test": "cd ./tools/unit-tests && pnpm test && cd ../..",
+    "publish:transformer": "cd packages/transformer && npm run publish:package"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/SukantPal/pixi-essentials.git"
+    "url": "git+https://github.com/khanzzirfan/pixi-essentials.git"
   },
   "keywords": [
     "pixi.js",
     "pixi",
     "webgl",
     "renderer",
-    "plugins"
+    "plugins",
+    "transformer",
+    "canva-style"
   ],
-  "author": "Shukant K. Pal <shukantpal@outlook.com>",
+  "author": "Irfan Khan (khanzzirfan)",
+  "contributors": [
+    "Shukant K. Pal <shukantpal@outlook.com> (Original author)"
+  ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/SukantPal/pixi-essentials/issues"
+    "url": "https://github.com/khanzzirfan/pixi-essentials/issues"
   },
-  "homepage": "https://github.com/SukantPal/pixi-essentials#readme",
+  "homepage": "https://github.com/khanzzirfan/pixi-essentials#readme",
   "dependencies": {
     "d-path-parser": "^1.0.0"
   },
