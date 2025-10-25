@@ -8,6 +8,12 @@ This is an enhanced version of `@pixi-essentials/transformer` with modern UI imp
 <img src="assets/transformer-001.png" width="790px" />
 </p>
 
+Group Selection
+
+<p align="center">
+<img src="assets/transformer-003.png" width="790px" />
+</p>
+
 ## Installation :package:
 
 ```bash
