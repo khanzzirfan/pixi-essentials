@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Transformer Test</title>
+    <title>Transformer Test v1.0.9-alpha.6</title>
     <style>
       body {
         margin: 0;
@@ -170,7 +170,38 @@
     </style>
   </head>
   <body>
-    <h1>Modern Canva-Style Transformer Test</h1>
+    <h1>Modern Canva-Style Transformer Test v1.0.9-alpha.6</h1>
+
+    <!-- Canva-Style Individual Borders Info -->
+    <div
+      style="
+        background: #f0f9ff;
+        border: 1px solid #0ea5e9;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+      "
+    >
+      <h3 style="margin: 0 0 10px 0; color: #0c4a6e">
+        🎨 Canva-Style Individual Borders
+      </h3>
+      <p style="margin: 0; color: #0c4a6e; font-size: 14px">
+        <strong>🎯 NEW: Nested Selection Feature!</strong><br />
+        • <strong>First element auto-focused</strong> - Circle is focused by
+        default (purple border)<br />
+        • <strong>Click to maintain</strong> - Click on focused element to keep
+        it focused (no cycling)<br />
+        • <strong>Click to focus</strong> - Click on different element to focus
+        it<br />
+        • <strong>Always one focused</strong> - Like Canva, there's always one
+        element with purple border<br />
+        • <strong>Group border</strong> - Purple border around entire
+        selection<br />
+        <em
+          >Try clicking on the shapes to see the nested selection in action!</em
+        >
+      </p>
+    </div>
 
     <!-- Theme Switcher -->
     <div style="margin-bottom: 20px">
@@ -264,7 +295,66 @@
       </div>
     </div>
 
-    <!-- Handle Size Examples -->
+    <!-- Nested Selection Controls -->
+    <div class="controls-section">
+      <h3>🎯 Nested Selection Controls</h3>
+      <div class="controls-grid">
+        <div class="control-group">
+          <label>Programmatic Focus:</label>
+          <button onclick="focusElement(0)" class="preset-btn">
+            Focus Circle
+          </button>
+          <button onclick="focusElement(1)" class="preset-btn">
+            Focus Star
+          </button>
+          <button onclick="focusElement(2)" class="preset-btn">
+            Focus Rectangle
+          </button>
+          <button onclick="focusElement(3)" class="preset-btn">
+            Focus Triangle
+          </button>
+        </div>
+
+        <div class="control-group">
+          <label>Navigation:</label>
+          <button onclick="cycleNext()" class="preset-btn">Cycle Next</button>
+          <button onclick="clearFocus()" class="preset-btn">Clear Focus</button>
+        </div>
+
+        <div class="control-group">
+          <label>Settings:</label>
+          <button
+            onclick="toggleNestedSelection()"
+            class="toggle-btn"
+            id="nested-enabled"
+          >
+            Enabled
+          </button>
+          <button
+            onclick="toggleShowNonFocused()"
+            class="toggle-btn"
+            id="show-non-focused"
+          >
+            Hide Others
+          </button>
+        </div>
+
+        <div class="control-group">
+          <label>Current Status:</label>
+          <div
+            id="focus-status"
+            style="
+              padding: 8px;
+              background: #f8f9fa;
+              border-radius: 4px;
+              font-size: 12px;
+            "
+          >
+            Loading...
+          </div>
+        </div>
+      </div>
+    </div>
     <div class="controls-section">
       <h3>📏 Handle Size Examples</h3>
       <div class="controls-grid">
@@ -520,10 +610,10 @@
     <script src="https://cdn.jsdelivr.net/npm/@pixi-essentials/bounds@3.0.0/dist/bounds.js"></script>
 
     <!-- Your local transformer package -->
-    <script src="packages/transformer/dist/transformer.js"></script>
+    <!-- <script src="packages/transformer/dist/transformer.js"></script> -->
 
-    <!-- Fallback: Use published version if local doesn't work -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/pixi-essentials-transformer-extended@1.0.2/dist/transformer.js"></script> -->
+    <!-- Use published version with Canva-style individual borders -->
+    <script src="https://cdn.jsdelivr.net/npm/pixi-essentials-transformer-extended@1.0.9-alpha.6/dist/transformer.js"></script>
 
     <script>
       const app = new PIXI.Application({
@@ -539,26 +629,74 @@
       app.stage.interactive = true;
       app.stage.eventMode = "static";
 
+      // Create multiple shapes to demonstrate nested selection
       const circle = app.stage.addChild(new PIXI.Graphics());
-
-      circle.beginFill(0xfedbac).drawCircle(0, 0, 100).endFill();
-      circle.pivot.set(50, 100);
-      circle.scale.set(1);
-      circle.position.set(300, 300);
+      circle.beginFill(0x4ade80).drawCircle(0, 0, 80).endFill(); // Green circle
+      circle.pivot.set(40, 40);
+      circle.position.set(200, 200);
 
       const star = app.stage.addChild(new PIXI.Graphics());
+      star.beginFill(0xf59e0b).drawStar(0, 0, 5, 60).endFill(); // Orange star
+      star.position.set(400, 200);
+      star.pivot.set(30, 30);
 
-      star.beginFill(0xfedbac).drawStar(0, 0, 8, 100).endFill();
-      star.position.set(800, 500);
-      star.pivot.set(50, 100);
+      const rectangle = app.stage.addChild(new PIXI.Graphics());
+      rectangle.beginFill(0xef4444).drawRect(0, 0, 120, 80).endFill(); // Red rectangle
+      rectangle.position.set(600, 200);
+      rectangle.pivot.set(60, 40);
 
-      const starText = star.addChild(
-        new PIXI.Text("Hello world!", {
-          fontSize: 12,
+      const triangle = app.stage.addChild(new PIXI.Graphics());
+      triangle
+        .beginFill(0x8b5cf6)
+        .drawPolygon([
+          new PIXI.Point(0, -50),
+          new PIXI.Point(-50, 50),
+          new PIXI.Point(50, 50),
+        ])
+        .endFill(); // Purple triangle
+      triangle.position.set(800, 200);
+      triangle.pivot.set(0, 0);
+
+      // Add labels to each shape
+      const circleLabel = circle.addChild(
+        new PIXI.Text("Circle", {
+          fontSize: 16,
+          fill: 0xffffff,
+          fontWeight: "bold",
         })
       );
+      circleLabel.anchor.set(0.5);
+      circleLabel.y = -10;
 
-      starText.x = -30;
+      const starLabel = star.addChild(
+        new PIXI.Text("Star", {
+          fontSize: 16,
+          fill: 0xffffff,
+          fontWeight: "bold",
+        })
+      );
+      starLabel.anchor.set(0.5);
+      starLabel.y = -10;
+
+      const rectLabel = rectangle.addChild(
+        new PIXI.Text("Rectangle", {
+          fontSize: 16,
+          fill: 0xffffff,
+          fontWeight: "bold",
+        })
+      );
+      rectLabel.anchor.set(0.5);
+      rectLabel.y = -10;
+
+      const triangleLabel = triangle.addChild(
+        new PIXI.Text("Triangle", {
+          fontSize: 16,
+          fill: 0xffffff,
+          fontWeight: "bold",
+        })
+      );
+      triangleLabel.anchor.set(0.5);
+      triangleLabel.y = -10;
 
       // Global transformer reference
       let transformer = null;
@@ -587,23 +725,56 @@
             rotateEnabled: true,
             boxRotationEnabled: true,
             transientGroupTilt: false,
-            group: [star, circle],
+            group: [circle, star, rectangle, triangle], // All 4 shapes
             stage: app.stage,
+            boundingBoxes: "all", // Must be "all" to show individual borders
+
+            // NESTED SELECTION (Canva-style) - NEW FEATURE!
+            nestedSelectionEnabled: true, // Enable click-to-focus
+            focusedElementBorderColor: 0x8b5cf6, // Purple for focused element
+            focusedElementBorderThickness: 2,
+            showNonFocusedBorders: false, // Hide non-focused borders
+
             wireframeStyle: {
-              thickness: 1,
-              color: 0xff0000,
+              thickness: 2,
+              color: 0x8b5cf6, // Purple group border
             },
-            // Default indigo theme
+            // Purple handles to match
             colorTheme: {
-              primary: 0x6366f1,
-              secondary: 0x4f46e5,
+              primary: 0x8b5cf6,
+              secondary: 0x7c3aed,
               background: 0xffffff,
-              glow: 0x6366f1,
+              glow: 0x8b5cf6,
               glowIntensity: 0.15,
             },
+            // Cyan individual borders (for non-focused elements if shown)
+            individualBorderColor: 0x00d4ff, // Cyan
+            individualBorderThickness: 1.5,
+            individualBorderAlpha: 1.0,
           })
         );
         console.log("Transformer created:", transformer);
+        console.log(
+          "Initial focused element index:",
+          transformer.focusedElementIndex
+        );
+        console.log("Initial focused element:", transformer.focusedElement);
+
+        // Listen to nested selection events
+        transformer.on("elementfocused", (element, index) => {
+          console.log(`🎯 Element focused at index ${index}:`, element);
+          updateFocusStatus();
+        });
+
+        transformer.on("elementfocuscleared", () => {
+          console.log("🔄 Element focus cleared");
+          updateFocusStatus();
+        });
+
+        // Update initial status
+        updateFocusStatus();
+
+        // Enable all theme buttons
 
         // Enable all theme buttons
         document.querySelectorAll(".theme-btn").forEach((btn) => {
@@ -1156,6 +1327,140 @@
           "wireframe-value"
         ).textContent = `${thickness}px`;
         console.log("Wireframe thickness updated:", thickness);
+      }
+
+      // Nested Selection Control Functions
+      function focusElement(index) {
+        if (!transformer) {
+          console.warn("Transformer not yet initialized. Please wait...");
+          return;
+        }
+
+        const elementNames = ["Circle", "Star", "Rectangle", "Triangle"];
+        transformer.focusedElementIndex = index;
+        console.log(
+          `🎯 Programmatically focused: ${elementNames[index]} (index ${index})`
+        );
+        updateFocusStatus();
+      }
+
+      function cycleNext() {
+        if (!transformer) {
+          console.warn("Transformer not yet initialized. Please wait...");
+          return;
+        }
+
+        transformer.focusNextElement();
+        console.log("🔄 Cycled to next element");
+        updateFocusStatus();
+      }
+
+      function clearFocus() {
+        if (!transformer) {
+          console.warn("Transformer not yet initialized. Please wait...");
+          return;
+        }
+
+        transformer.clearElementFocus();
+        console.log("🔄 Cleared element focus");
+        updateFocusStatus();
+      }
+
+      function toggleNestedSelection() {
+        if (!transformer) {
+          console.warn("Transformer not yet initialized. Please wait...");
+          return;
+        }
+
+        transformer.nestedSelectionEnabled =
+          !transformer.nestedSelectionEnabled;
+        transformer.lazyDirty = true;
+
+        // Update element interactions when toggling nested selection
+        transformer.group.forEach((element, index) => {
+          if (
+            transformer.nestedSelectionEnabled &&
+            transformer.group.length > 1
+          ) {
+            element.interactive = true;
+            element.eventMode = "static";
+          } else {
+            element.interactive = false;
+            element.eventMode = "none";
+          }
+        });
+
+        const button = document.getElementById("nested-enabled");
+        if (transformer.nestedSelectionEnabled) {
+          button.textContent = "Enabled";
+          button.className = "toggle-btn enabled";
+        } else {
+          button.textContent = "Disabled";
+          button.className = "toggle-btn disabled";
+        }
+
+        console.log(
+          "🔄 Nested selection toggled:",
+          transformer.nestedSelectionEnabled
+        );
+        updateFocusStatus();
+      }
+
+      function toggleShowNonFocused() {
+        if (!transformer) {
+          console.warn("Transformer not yet initialized. Please wait...");
+          return;
+        }
+
+        transformer.showNonFocusedBorders = !transformer.showNonFocusedBorders;
+        transformer.lazyDirty = true;
+
+        const button = document.getElementById("show-non-focused");
+        if (transformer.showNonFocusedBorders) {
+          button.textContent = "Show Others";
+          button.className = "toggle-btn enabled";
+        } else {
+          button.textContent = "Hide Others";
+          button.className = "toggle-btn disabled";
+        }
+
+        console.log(
+          "🔄 Show non-focused toggled:",
+          transformer.showNonFocusedBorders
+        );
+        updateFocusStatus();
+      }
+
+      function updateFocusStatus() {
+        if (!transformer) return;
+
+        const elementNames = ["Circle", "Star", "Rectangle", "Triangle"];
+        const statusDiv = document.getElementById("focus-status");
+
+        if (transformer.focusedElementIndex >= 0) {
+          const focusedName = elementNames[transformer.focusedElementIndex];
+          statusDiv.innerHTML = `
+            <strong>Focused:</strong> ${focusedName} (index ${
+            transformer.focusedElementIndex
+          })<br>
+            <strong>Nested Selection:</strong> ${
+              transformer.nestedSelectionEnabled ? "Enabled" : "Disabled"
+            }<br>
+            <strong>Show Others:</strong> ${
+              transformer.showNonFocusedBorders ? "Yes" : "No"
+            }
+          `;
+        } else {
+          statusDiv.innerHTML = `
+            <strong>Focused:</strong> None (all elements visible)<br>
+            <strong>Nested Selection:</strong> ${
+              transformer.nestedSelectionEnabled ? "Enabled" : "Disabled"
+            }<br>
+            <strong>Show Others:</strong> ${
+              transformer.showNonFocusedBorders ? "Yes" : "No"
+            }
+          `;
+        }
       }
     </script>
   </body>

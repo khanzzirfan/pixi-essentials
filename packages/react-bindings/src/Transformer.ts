@@ -10,10 +10,10 @@ import { applyEventProps } from "./utils/applyEventProps";
 import type {
   ITransformerCursors,
   ITransformerStyle,
-  ITransformerHandleStyle,
   ITransformerColorTheme,
   IRotatorAnchorConfig,
 } from "pixi-essentials-transformer-extended";
+import type { ITransformerHandleStyle } from "pixi-essentials-transformer-extended";
 import type React from "react";
 
 const EMPTY: any = {};
@@ -51,12 +51,32 @@ export type TransformerProps = {
   // Modern Canva-style features
   colorTheme?: Partial<ITransformerColorTheme>;
   rotatorAnchor?: Partial<IRotatorAnchorConfig>;
+
+  // Nested selection features (Canva-style)
+  nestedSelectionEnabled?: boolean;
+  focusedElementBorderColor?: number;
+  focusedElementBorderThickness?: number;
+  showNonFocusedBorders?: boolean;
+  individualBorderColor?: number;
+  individualBorderThickness?: number;
+  individualBorderAlpha?: number;
+
+  // Event handlers for nested selection
+  elementfocused?: (element: DisplayObject, index: number) => void;
+  elementfocuscleared?: () => void;
+  transformcommit?: () => void;
+
+  // Focus control methods (for programmatic control)
+  focusedElementIndex?: number;
+  onFocusChange?: (index: number, element: DisplayObject | null) => void;
 };
 
 /** @ignore */
 const HANDLER_TO_EVENT = {
   transformchange: "transformchange",
   transformcommit: "transformcommit",
+  elementfocused: "elementfocused",
+  elementfocuscleared: "elementfocuscleared",
 };
 
 /**
@@ -182,6 +202,89 @@ export const Transformer: React.FC<TransformerProps> = PixiComponent<
         JSON.stringify(newRotatorAnchor.dotPattern)
     ) {
       instance.rotatorAnchor = newRotatorAnchor;
+    }
+
+    // Handle nested selection properties
+    if (oldProps.nestedSelectionEnabled !== newProps.nestedSelectionEnabled) {
+      instance.nestedSelectionEnabled =
+        newProps.nestedSelectionEnabled !== undefined
+          ? newProps.nestedSelectionEnabled
+          : true; // Default to enabled
+    }
+
+    if (
+      oldProps.focusedElementBorderColor !== newProps.focusedElementBorderColor
+    ) {
+      instance.focusedElementBorderColor =
+        newProps.focusedElementBorderColor !== undefined
+          ? newProps.focusedElementBorderColor
+          : 0x8b5cf6; // Default purple
+    }
+
+    if (
+      oldProps.focusedElementBorderThickness !==
+      newProps.focusedElementBorderThickness
+    ) {
+      instance.focusedElementBorderThickness =
+        newProps.focusedElementBorderThickness;
+    }
+
+    if (oldProps.showNonFocusedBorders !== newProps.showNonFocusedBorders) {
+      instance.showNonFocusedBorders =
+        newProps.showNonFocusedBorders !== undefined
+          ? newProps.showNonFocusedBorders
+          : false; // Default to hiding non-focused
+    }
+
+    if (oldProps.individualBorderColor !== newProps.individualBorderColor) {
+      instance.individualBorderColor =
+        newProps.individualBorderColor !== undefined
+          ? newProps.individualBorderColor
+          : 0x00d4ff; // Default cyan
+    }
+
+    if (
+      oldProps.individualBorderThickness !== newProps.individualBorderThickness
+    ) {
+      instance.individualBorderThickness = newProps.individualBorderThickness;
+    }
+
+    if (oldProps.individualBorderAlpha !== newProps.individualBorderAlpha) {
+      instance.individualBorderAlpha =
+        newProps.individualBorderAlpha !== undefined
+          ? newProps.individualBorderAlpha
+          : 1.0; // Default full opacity
+    }
+
+    // Handle programmatic focus control
+    if (oldProps.focusedElementIndex !== newProps.focusedElementIndex) {
+      if (newProps.focusedElementIndex !== undefined) {
+        instance.focusedElementIndex = newProps.focusedElementIndex;
+      }
+    }
+
+    // Set up focus change callback
+    if (oldProps.onFocusChange !== newProps.onFocusChange) {
+      // Remove old listener if it exists
+      if (oldProps.onFocusChange) {
+        instance.off("elementfocused", oldProps.onFocusChange);
+        instance.off("elementfocuscleared", () =>
+          oldProps.onFocusChange?.(-1, null)
+        );
+      }
+
+      // Add new listener
+      if (newProps.onFocusChange) {
+        instance.on(
+          "elementfocused",
+          (element: DisplayObject, index: number) => {
+            newProps.onFocusChange?.(index, element);
+          }
+        );
+        instance.on("elementfocuscleared", () => {
+          newProps.onFocusChange?.(-1, null);
+        });
+      }
     }
   },
 });
