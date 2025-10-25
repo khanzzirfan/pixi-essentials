@@ -75,3 +75,7 @@ index.d.ts
 
 # IntelliJ
 *.iml
+
+## npmrc 
+.npmrc
+**/.npmrc

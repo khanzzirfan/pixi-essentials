@@ -362,6 +362,27 @@ export interface ITransformerOptions {
 
   /** Configuration for the rotator anchor line */
   rotatorAnchor?: IRotatorAnchorConfig;
+
+  /** Color for individual element borders when multiple elements are selected */
+  individualBorderColor?: number;
+
+  /** Thickness for individual borders (defaults to wireframeStyle.thickness) */
+  individualBorderThickness?: number;
+
+  /** Alpha/opacity for individual borders (0-1) */
+  individualBorderAlpha?: number;
+
+  /** Enable nested selection (click to select individual elements within group) */
+  nestedSelectionEnabled?: boolean;
+
+  /** Color for the focused/selected inner element border */
+  focusedElementBorderColor?: number;
+
+  /** Thickness for focused element border */
+  focusedElementBorderThickness?: number;
+
+  /** Whether to show individual borders for non-focused elements */
+  showNonFocusedBorders?: boolean;
 }
 
 // api-extractor-disable-next-line: [ae-forgotten-export]
@@ -391,7 +412,26 @@ const Container_ = Container as unknown as {
  */
 export class Transformer extends Container_ {
   /** The group of display-objects under transformation. */
-  public group: DisplayObject[];
+  private _group: DisplayObject[];
+
+  /** Getter for the group property */
+  get group(): DisplayObject[] {
+    return this._group;
+  }
+
+  /** Setter for the group property - handles React prop updates */
+  set group(value: DisplayObject[]) {
+    this._group = value || [];
+
+    // Reset focus when group changes
+    this._focusedElementIndex = this._group.length > 0 ? 0 : -1;
+
+    // Update element index map and setup interactions
+    this.updateElementIndexMap();
+
+    // Force redraw
+    this.lazyDirty = true;
+  }
 
   /**
    * Specify which bounding boxes should be drawn in the wireframe.
@@ -419,6 +459,27 @@ export class Transformer extends Container_ {
 
   /** Cursors to use in the transformer */
   public cursors: ITransformerCursors;
+
+  /** Color for individual element borders */
+  public individualBorderColor: number;
+
+  /** Thickness for individual element borders */
+  public individualBorderThickness?: number;
+
+  /** Alpha for individual element borders */
+  public individualBorderAlpha: number;
+
+  /** Enable nested selection (click to select individual elements within group) */
+  public nestedSelectionEnabled: boolean;
+
+  /** Color for focused element border */
+  public focusedElementBorderColor: number;
+
+  /** Thickness for focused element border */
+  public focusedElementBorderThickness?: number;
+
+  /** Show borders for non-focused elements */
+  public showNonFocusedBorders: boolean;
 
   /**
    * Flags whether the transformer should **not** redraw each frame (good for performance)
@@ -550,6 +611,12 @@ export class Transformer extends Container_ {
   /** The rotator anchor configuration */
   protected _rotatorAnchorConfig: IRotatorAnchorConfig;
 
+  /** Index of currently focused element within the group (-1 = none focused) */
+  protected _focusedElementIndex: number;
+
+  /** Map to track which display object corresponds to which index */
+  protected _elementIndexMap: WeakMap<DisplayObject, number>;
+
   private _pointerDown: boolean;
   private _pointerDragging: boolean;
   private _pointerPosition: Point;
@@ -585,7 +652,7 @@ export class Transformer extends Container_ {
     this.cursor = this.cursors.default;
 
     this.boundingBoxes = options.boundingBoxes || "all";
-    this.group = options.group || [];
+    this._group = options.group || [];
     this.boxRotationTolerance =
       options.boxRotationTolerance || DEFUALT_BOX_ROTATION_TOLERANCE;
     this.boxScalingTolerance =
@@ -654,6 +721,44 @@ export class Transformer extends Container_ {
       dotPattern: [2, 4],
       ...options.rotatorAnchor,
     };
+
+    // Initialize individual border styling (Canva-style)
+    this.individualBorderColor =
+      options.individualBorderColor !== undefined
+        ? options.individualBorderColor
+        : 0x00d4ff; // Cyan like Canva
+
+    this.individualBorderThickness = options.individualBorderThickness;
+
+    this.individualBorderAlpha =
+      options.individualBorderAlpha !== undefined
+        ? options.individualBorderAlpha
+        : 1.0;
+
+    // Initialize nested selection (Canva-style behavior)
+    this.nestedSelectionEnabled =
+      options.nestedSelectionEnabled !== undefined
+        ? options.nestedSelectionEnabled
+        : true; // Enable by default for Canva-style behavior
+
+    this.focusedElementBorderColor =
+      options.focusedElementBorderColor !== undefined
+        ? options.focusedElementBorderColor
+        : 0x8b5cf6; // Purple for focused element
+
+    this.focusedElementBorderThickness = options.focusedElementBorderThickness;
+
+    this.showNonFocusedBorders =
+      options.showNonFocusedBorders !== undefined
+        ? options.showNonFocusedBorders
+        : false; // Hide non-focused by default
+
+    // ALWAYS start with first element focused if we have a group
+    this._focusedElementIndex = this._group.length > 0 ? 0 : -1;
+    this._elementIndexMap = new WeakMap();
+
+    // Update element index map
+    this.updateElementIndexMap();
 
     // Initialize wireframe style with color theme
     this._wireframeStyle = Object.assign(
@@ -955,6 +1060,121 @@ export class Transformer extends Container_ {
       dotPattern: [2, 4],
       ...value,
     };
+  }
+
+  /**
+   * Get the currently focused element within the group
+   */
+  get focusedElement(): DisplayObject | null {
+    if (
+      this._focusedElementIndex >= 0 &&
+      this._focusedElementIndex < this._group.length
+    ) {
+      return this._group[this._focusedElementIndex];
+    }
+    return null;
+  }
+
+  /**
+   * Set the focused element by index
+   */
+  set focusedElementIndex(index: number) {
+    if (index >= -1 && index < this._group.length) {
+      const oldIndex = this._focusedElementIndex;
+      this._focusedElementIndex = index;
+      this.lazyDirty = true;
+
+      // Emit events when focus changes programmatically
+      if (oldIndex !== index) {
+        if (index >= 0 && index < this._group.length) {
+          this.emit("elementfocused", this._group[index], index);
+        } else {
+          this.emit("elementfocuscleared");
+        }
+      }
+    }
+  }
+
+  get focusedElementIndex(): number {
+    return this._focusedElementIndex;
+  }
+
+  /**
+   * Focus a specific element by reference
+   */
+  focusElement(element: DisplayObject): void {
+    const index = this._elementIndexMap.get(element);
+    if (index !== undefined) {
+      this._focusedElementIndex = index;
+      this.lazyDirty = true;
+      this.emit("elementfocused", element, index);
+    }
+  }
+
+  /**
+   * Clear element focus (show all individual borders)
+   */
+  clearElementFocus(): void {
+    this._focusedElementIndex = -1;
+    this.lazyDirty = true;
+    this.emit("elementfocuscleared");
+  }
+
+  /**
+   * Cycle to next element in group
+   */
+  focusNextElement(): void {
+    if (this._group.length === 0) return;
+
+    this._focusedElementIndex =
+      (this._focusedElementIndex + 1) % this._group.length;
+    this.lazyDirty = true;
+    this.emit("elementfocused", this.focusedElement, this._focusedElementIndex);
+  }
+
+  /**
+   * Update the element index map when group changes
+   */
+  private updateElementIndexMap(): void {
+    this._elementIndexMap = new WeakMap();
+    this._group.forEach((element, index) => {
+      this._elementIndexMap.set(element, index);
+      this.setupElementInteraction(element, index);
+    });
+  }
+
+  /**
+   * Set up or remove interaction for individual elements
+   */
+  private setupElementInteraction(element: DisplayObject, index: number): void {
+    // Remove any existing handlers
+    element.off("pointerdown");
+
+    // Make individual elements interactive for nested selection
+    if (this.nestedSelectionEnabled && this._group.length > 1) {
+      element.interactive = true;
+      element.eventMode = "static";
+
+      // Add click handler to individual element
+      element.on("pointerdown", (e: FederatedPointerEvent) => {
+        e.stopPropagation(); // Prevent transformer from handling this
+
+        if (this._focusedElementIndex === index) {
+          // Click on already focused element: keep it focused (don't cycle)
+          // This maintains the current focus without changing
+          this.lazyDirty = true;
+        } else {
+          // Focus this element
+          this._focusedElementIndex = index;
+          this.lazyDirty = true;
+          this.emit("elementfocused", element, index);
+        }
+      });
+    } else {
+      // Disable individual element interaction when nested selection is off
+      element.interactive = false;
+      element.eventMode = "none";
+    }
   }
 
   /**
@@ -1428,7 +1648,7 @@ export class Transformer extends Container_ {
     this._transformHandle = null;
     this._transformType = "none";
 
-    if (this.transientGroupTilt !== false && this.group.length > 1) {
+    if (this.transientGroupTilt !== false && this._group.length > 1) {
       this.updateGroupBounds(0);
     }
 
@@ -1451,7 +1671,7 @@ export class Transformer extends Container_ {
 
   /** Recalculates the transformer's geometry. This is called on each render. */
   protected draw(): void {
-    const targets = this.group;
+    const targets = this._group;
     const { color, thickness } = this._wireframeStyle;
 
     // Updates occur right here!
@@ -1465,15 +1685,50 @@ export class Transformer extends Container_ {
       this.wireframe.beginFill(0xffffff, 1e-4);
     }
 
-    for (
-      let i = 0, j = targets.length;
-      i < j && this.boundingBoxes === "all";
-      i++
-    ) {
-      this.wireframe.drawBounds(
-        Transformer.calculateOrientedBounds(targets[i], tempBounds)
-      );
+    // CANVA STYLE: Draw individual element borders with nested selection support
+    const isMultiSelection = targets.length > 1;
+    const showIndividualBorders =
+      isMultiSelection && this.boundingBoxes === "all";
+
+    // NESTED SELECTION: Draw individual borders based on focus state
+    if (showIndividualBorders) {
+      const individualThickness = this.individualBorderThickness || thickness;
+      const focusedThickness = this.focusedElementBorderThickness || thickness;
+
+      for (let i = 0, j = targets.length; i < j; i++) {
+        const isFocused =
+          this.nestedSelectionEnabled && this._focusedElementIndex === i;
+        const shouldShow =
+          !this.nestedSelectionEnabled ||
+          isFocused ||
+          (this.showNonFocusedBorders && this._focusedElementIndex === -1);
+
+        if (shouldShow) {
+          // Draw focused element with special color and thickness
+          if (isFocused) {
+            this.wireframe.lineStyle(
+              focusedThickness,
+              this.focusedElementBorderColor,
+              1.0
+            );
+          } else {
+            // Draw non-focused elements in cyan
+            this.wireframe.lineStyle(
+              individualThickness,
+              this.individualBorderColor,
+              this.individualBorderAlpha
+            );
+          }
+
+          this.wireframe.drawBounds(
+            Transformer.calculateOrientedBounds(targets[i], tempBounds)
+          );
+        }
+      }
     }
+
+    // Reset to main group color (purple/primary color)
+    this.wireframe.lineStyle(thickness, color);
 
     // groupBounds may change on each render-loop b/c of any ongoing animation
     const groupBounds =
@@ -1484,9 +1739,9 @@ export class Transformer extends Container_ {
             tempBounds,
             true
           )
-        : Transformer.calculateOrientedBounds(targets[0], tempBounds); // Auto-detect rotation
+        : Transformer.calculateOrientedBounds(targets[0], tempBounds);
 
-    // Redraw skeleton and position handles
+    // Draw the main group bounding box (purple in Canva style)
     this.wireframe.drawBounds(groupBounds);
 
     this.drawHandles(groupBounds);
@@ -1665,6 +1920,42 @@ export class Transformer extends Container_ {
     this._pointerDown = true;
     this._pointerDragging = false;
 
+    // Check if nested selection is enabled and we have multiple elements
+    if (this.nestedSelectionEnabled && this._group.length > 1) {
+      const clickPoint = e.data.global;
+      this.projectionTransform.applyInverse(clickPoint, tempPoint);
+
+      // Check if click is on any individual element
+      for (let i = 0; i < this._group.length; i++) {
+        const elementBounds = Transformer.calculateOrientedBounds(
+          this._group[i],
+          tempBounds
+        );
+
+        if (elementBounds.contains(tempPoint.x, tempPoint.y)) {
+          // Clicked on an element - handle nested selection
+          if (this._focusedElementIndex === i) {
+            // Click on already focused element: keep it focused (don't cycle)
+            // This maintains the current focus without changing
+            this.lazyDirty = true;
+          } else {
+            // Focus this element
+            this._focusedElementIndex = i;
+            this.lazyDirty = true;
+            this.emit("elementfocused", this._group[i], i);
+          }
+
+          // Stop propagation to prevent transformer from handling this click
+          e.stopPropagation();
+
+          // Don't continue with normal transformer handling
+          return;
+        }
+      }
+    }
+
+    // If we get here, either nested selection is disabled or click wasn't on an element
+    // Continue with normal transformer behavior
     e.stopPropagation();
 
     if (this._pointerMoveTarget) {
@@ -1785,7 +2076,7 @@ export class Transformer extends Container_ {
    * @param skipUpdate - whether to skip updating the group-bounds after applying the transform
    */
   protected prependTransform(delta: Matrix, skipUpdate = false): void {
-    const group = this.group;
+    const group = this._group;
 
     for (let i = 0, j = group.length; i < j; i++) {
       multiplyTransform(group[i], delta, false);
@@ -1809,7 +2100,7 @@ export class Transformer extends Container_ {
     rotation: number = this.groupBounds.rotation
   ): void {
     Transformer.calculateGroupOrientedBounds(
-      this.group,
+      this._group,
       rotation,
       this.groupBounds
     );
