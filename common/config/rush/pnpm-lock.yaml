@@ -7035,7 +7035,7 @@ packages:
     dev: false
 
   file:projects/pixi-essentials-react-bindings-extended.tgz(@pixi/constants@5.3.12)(@pixi/graphics@7.1.4)(@pixi/ticker@7.1.4):
-    resolution: {integrity: sha512-SEhLNqwUkXy7yS05kWD1vVOC2oGujZhITpLohp+azq7Qd7K+xSl/f3/VbJwhDp1mr8/jaUVCeic5zMHyd5Ttrw==, tarball: file:projects/pixi-essentials-react-bindings-extended.tgz}
+    resolution: {integrity: sha512-PrMwBgIu0WuQkQ9FviUTr8PIhnMTzCNvGM0qGpRWjMWGTlSFFGqsQJXr86VFgWJyVf7WWADGtnobNqI3iAkRFQ==, tarball: file:projects/pixi-essentials-react-bindings-extended.tgz}
     id: file:projects/pixi-essentials-react-bindings-extended.tgz
     name: '@rush-temp/pixi-essentials-react-bindings-extended'
     version: 0.0.0
@@ -7072,7 +7072,7 @@ packages:
     dev: false
 
   file:projects/pixi-essentials-transformer-extended.tgz:
-    resolution: {integrity: sha512-d17g0ZNDVRglI7jVnPpLmw0khI7YEy8Q6g26SQ75gWeIlSTINH5G7Dxc9U/1PPf6cJFlFNzdrkgHL4cMXkujHw==, tarball: file:projects/pixi-essentials-transformer-extended.tgz}
+    resolution: {integrity: sha512-O9QaQazRGUcQ8wUlbx1tdXtNbEcmErYpZvZvZO0L4AH1PpqT9g5w6xeWykCMna0wutmskSr2LSXhFrenjiwcig==, tarball: file:projects/pixi-essentials-transformer-extended.tgz}
     name: '@rush-temp/pixi-essentials-transformer-extended'
     version: 0.0.0
     dependencies:
@@ -7083,6 +7083,7 @@ packages:
       '@pixi/events': 7.1.4
       '@pixi/graphics': 7.1.4
       '@pixi/math': 7.1.4
+      '@pixi/sprite': 7.1.4
       eslint: 7.7.0
       rollup: 2.27.1
       tslib: 2.0.3
