@@ -1,6 +1,6 @@
 {
   "name": "pixi-essentials-react-bindings-extended",
-  "version": "1.0.11",
+  "version": "1.0.12",
   "description": "React components for display-objects provided by pixi-essentials-transformer-extended, for usage with @pixi/react. Modern Canva-style transformer with enhanced features.",
   "main": "lib/react-bindings.js",
   "module": "lib/react-bindings.es.js",
@@ -45,12 +45,12 @@
     "@pixi/math": "^7.0.0",
     "@pixi/react": "^7.0.0",
     "react": ">=17.0.0",
-    "pixi-essentials-transformer-extended": "^1.0.11"
+    "pixi-essentials-transformer-extended": "^1.0.12"
   },
   "devDependencies": {
     "@pixi/react": "^7.0.0",
     "@types/react": "^16.9.46",
-    "@pixi-build-tools/rollup-configurator": "^1.0.10",
+    "@pixi-build-tools/rollup-configurator": "^1.0.12",
     "tslib": "~2.0.1",
     "typescript": "~5.3.3",
     "eslint": "~7.7.0",
