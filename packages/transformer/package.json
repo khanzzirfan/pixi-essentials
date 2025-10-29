@@ -1,6 +1,6 @@
 {
   "name": "pixi-essentials-transformer-extended",
-  "version": "1.0.9-alpha.6",
+  "version": "1.0.10",
   "description": "Modern Canva-style transformer for PixiJS - Interactive display-object editor with beautiful handles (Extended version of @pixi-essentials/transformer)",
   "main": "lib/transformer.js",
   "module": "lib/transformer.es.js",
@@ -9,7 +9,8 @@
   "scripts": {
     "build": "rollup -c node_modules/@pixi-build-tools/rollup-configurator/index.js --silent",
     "build:types": "rm -rf compile && tsc",
-    "publish:package": "npm run build && npm publish"
+    "publish:package": "npm run build && npm publish",
+    "pp": "npm run build && npm publish --tag beta"
   },
   "repository": {
     "type": "git",
