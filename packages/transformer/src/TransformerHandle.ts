@@ -1,7 +1,8 @@
 import { Graphics } from "@pixi/graphics";
 import { Point } from "@pixi/math";
 import { Renderer, Texture } from "@pixi/core";
-import { Sprite } from "@pixi/sprite";
+// Note: Avoid importing Sprite to keep peer deps minimal; we'll render
+// the SVG texture directly via Graphics texture fill.
 
 import type { Container } from "@pixi/display";
 import type { Handle, Transformer } from "./Transformer";
@@ -105,7 +106,11 @@ export class TransformerHandle extends Graphics_ {
   private _pointerDragging: boolean;
   private _pointerPosition: Point;
   private _pointerMoveTarget: (Container & IFederatedDisplayObject) | null;
-  private _rotatorSprite: Sprite | null = null;
+  private _rotatorTexture: Texture | null = null;
+  private _rotatorKey: string | null = null;
+
+  // Cache for rotator textures to avoid jank on re-creation
+  private static _rotatorTextureCache: Map<string, Texture> = new Map();
 
   /**
    * @param {Transformer} transformer
@@ -314,13 +319,6 @@ export class TransformerHandle extends Graphics_ {
    * Draws rotator handle using SVG sprite
    */
   private drawRotatorHandle(style: ITransformerHandleStyle): void {
-    // Remove old sprite if exists
-    if (this._rotatorSprite) {
-      this.removeChild(this._rotatorSprite);
-      this._rotatorSprite.destroy();
-      this._rotatorSprite = null;
-    }
-
     // Determine icon color (explicit override > outlineColor > default)
     const iconColor = style.outlineColor || 0x6366f1;
     const colorHex = "#" + iconColor.toString(16).padStart(6, "0");
@@ -333,24 +331,30 @@ export class TransformerHandle extends Graphics_ {
     const baseRadius = style.radius || 7;
     const scaleFactor = baseRadius / 7; // Scale relative to default 7px radius
     const spriteSize = Math.round(28 * scaleFactor); // Scale the 28px base size
+    const key = `${colorHex}:${rotatorArrowColorHex}:${spriteSize}`;
 
-    // Create SVG data URL with scaled size and dual colors
-    const svgDataUrl = createRotatorSVG(
-      colorHex,
-      rotatorArrowColorHex,
-      spriteSize
-    );
+    // Update texture only if key changed
+    if (this._rotatorKey !== key) {
+      let texture = TransformerHandle._rotatorTextureCache.get(key);
+      if (!texture) {
+        const svgDataUrl = createRotatorSVG(
+          colorHex,
+          rotatorArrowColorHex,
+          spriteSize
+        );
+        texture = Texture.from(svgDataUrl);
+        TransformerHandle._rotatorTextureCache.set(key, texture);
+      }
+      this._rotatorTexture = texture;
+      this._rotatorKey = key;
+    }
 
-    // Create texture from SVG
-    const texture = Texture.from(svgDataUrl);
-
-    // Create sprite
-    this._rotatorSprite = new Sprite(texture);
-    this._rotatorSprite.anchor.set(0.5, 0.5);
-    this._rotatorSprite.width = spriteSize;
-    this._rotatorSprite.height = spriteSize;
-
-    this.addChild(this._rotatorSprite);
+    // Draw the texture directly centered at (0,0)
+    if (this._rotatorTexture) {
+      this.beginTextureFill({ texture: this._rotatorTexture })
+        .drawRect(-spriteSize / 2, -spriteSize / 2, spriteSize, spriteSize)
+        .endFill();
+    }
   }
 
   /**
