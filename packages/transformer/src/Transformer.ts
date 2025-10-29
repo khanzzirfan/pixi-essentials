@@ -383,6 +383,9 @@ export interface ITransformerOptions {
 
   /** Whether to show individual borders for non-focused elements */
   showNonFocusedBorders?: boolean;
+
+  /** Threshold in pixels to distinguish click from drag (default: 5) */
+  clickThreshold?: number;
 }
 
 // api-extractor-disable-next-line: [ae-forgotten-export]
@@ -621,6 +624,15 @@ export class Transformer extends Container_ {
   private _pointerDragging: boolean;
   private _pointerPosition: Point;
   private _pointerMoveTarget: DisplayObject & IFederatedDisplayObject;
+
+  /** Threshold in pixels to distinguish click from drag */
+  private _clickThreshold: number;
+
+  /** Position where pointer was initially pressed */
+  private _clickStartPosition: Point;
+
+  /** Index of element that was clicked (before drag threshold) */
+  private _elementClickCandidate: number;
 
   /* eslint-disable max-len */
   /**
@@ -885,6 +897,11 @@ export class Transformer extends Container_ {
     this._pointerPosition = new Point();
     this._pointerMoveTarget = null;
 
+    // Click vs drag detection
+    this._clickThreshold = options.clickThreshold || 5;
+    this._clickStartPosition = new Point();
+    this._elementClickCandidate = -1;
+
     this.onPointerDown = this.onPointerDown.bind(this);
     this.onPointerMove = this.onPointerMove.bind(this);
     this.onPointerUp = this.onPointerUp.bind(this);
@@ -1146,34 +1163,20 @@ export class Transformer extends Container_ {
   /**
    * Set up or remove interaction for individual elements
    */
-  private setupElementInteraction(element: DisplayObject, index: number): void {
-    // Remove any existing handlers
-    element.off("pointerdown");
-
-    // Make individual elements interactive for nested selection
-    if (this.nestedSelectionEnabled && this._group.length > 1) {
-      element.interactive = true;
-      element.eventMode = "static";
-
-      // Add click handler to individual element
-      element.on("pointerdown", (e: FederatedPointerEvent) => {
-        e.stopPropagation(); // Prevent transformer from handling this
-
-        if (this._focusedElementIndex === index) {
-          // Click on already focused element: keep it focused (don't cycle)
-          // This maintains the current focus without changing
-          this.lazyDirty = true;
-        } else {
-          // Focus this element
-          this._focusedElementIndex = index;
-          this.lazyDirty = true;
-          this.emit("elementfocused", element, index);
-        }
-      });
-    } else {
-      // Disable individual element interaction when nested selection is off
-      element.interactive = false;
+  private setupElementInteraction(
+    element: DisplayObject,
+    _index: number
+  ): void {
+    // IMPORTANT: Make elements NON-interactive
+    // The transformer will handle all interaction centrally
+    if ("eventMode" in element) {
       element.eventMode = "none";
+    }
+    if ("interactive" in element) {
+      element.interactive = false;
+    }
+    if ("interactiveChildren" in element) {
+      element.interactiveChildren = true; // Allow children to be rendered normally
     }
   }
 
@@ -1290,7 +1293,7 @@ export class Transformer extends Container_ {
     y1: number,
     x2: number,
     y2: number,
-    lineWidth: number,
+    _lineWidth: number,
     color: number
   ): void {
     const config = this._rotatorAnchorConfig;
@@ -1305,7 +1308,7 @@ export class Transformer extends Container_ {
     const unitX = dx / distance;
     const unitY = dy / distance;
 
-    this.wireframe.lineStyle(lineWidth, color);
+    this.wireframe.lineStyle(_lineWidth, color);
 
     for (let i = 0; i < dashCount; i++) {
       const startX = x1 + unitX * i * (dashLength + gapLength);
@@ -1325,7 +1328,7 @@ export class Transformer extends Container_ {
     y1: number,
     x2: number,
     y2: number,
-    lineWidth: number,
+    _lineWidth: number,
     color: number
   ): void {
     const config = this._rotatorAnchorConfig;
@@ -1919,13 +1922,27 @@ export class Transformer extends Container_ {
   protected onPointerDown(e: FederatedPointerEvent): void {
     this._pointerDown = true;
     this._pointerDragging = false;
+    this._clickStartPosition.copyFrom(e.global);
+    this._pointerPosition.copyFrom(e.global);
 
-    // Check if nested selection is enabled and we have multiple elements
-    if (this.nestedSelectionEnabled && this._group.length > 1) {
-      const clickPoint = e.data.global;
+    // Check if we clicked on a handle first
+    const clickedHandle = this.wireframe.hitHandleType(
+      this.groupBounds,
+      this.projectionTransform,
+      e.global
+    );
+
+    if (clickedHandle) {
+      // Clicked on a handle - will start transform operation
+      this._transformHandle = clickedHandle;
+      this._elementClickCandidate = -1;
+    } else if (this.nestedSelectionEnabled && this._group.length > 1) {
+      // Check if click is on any individual element for nested selection
+      const clickPoint = e.global;
       this.projectionTransform.applyInverse(clickPoint, tempPoint);
 
-      // Check if click is on any individual element
+      this._elementClickCandidate = -1;
+
       for (let i = 0; i < this._group.length; i++) {
         const elementBounds = Transformer.calculateOrientedBounds(
           this._group[i],
@@ -1933,31 +1950,15 @@ export class Transformer extends Container_ {
         );
 
         if (elementBounds.contains(tempPoint.x, tempPoint.y)) {
-          // Clicked on an element - handle nested selection
-          if (this._focusedElementIndex === i) {
-            // Click on already focused element: keep it focused (don't cycle)
-            // This maintains the current focus without changing
-            this.lazyDirty = true;
-          } else {
-            // Focus this element
-            this._focusedElementIndex = i;
-            this.lazyDirty = true;
-            this.emit("elementfocused", this._group[i], i);
-          }
-
-          // Stop propagation to prevent transformer from handling this click
-          e.stopPropagation();
-
-          // Don't continue with normal transformer handling
-          return;
+          this._elementClickCandidate = i;
+          break;
         }
       }
     }
 
-    // If we get here, either nested selection is disabled or click wasn't on an element
-    // Continue with normal transformer behavior
     e.stopPropagation();
 
+    // Set up global pointer move listener
     if (this._pointerMoveTarget) {
       this._pointerMoveTarget.removeEventListener(
         "globalpointermove",
@@ -1977,7 +1978,7 @@ export class Transformer extends Container_ {
   /** Called on the `pointermove` event. You must call the super implementation. */
   protected onPointerMove(e: FederatedPointerEvent): void {
     const lastPointerPosition = this._pointerPosition;
-    const currentPointerPosition = pointPool.allocate().copyFrom(e.data.global);
+    const currentPointerPosition = pointPool.allocate().copyFrom(e.global);
     const hoveredHandle = this.wireframe.hitHandleType(
       this.groupBounds,
       this.projectionTransform,
@@ -1985,12 +1986,24 @@ export class Transformer extends Container_ {
     );
 
     if (!this._pointerDown) {
+      // Just hovering - update cursor
       this.setCursorFromHoveredHandle(hoveredHandle);
     } else {
-      const cx = currentPointerPosition.x;
-      const cy = currentPointerPosition.y;
+      // Calculate distance moved
+      const distance = Math.sqrt(
+        Math.pow(currentPointerPosition.x - this._clickStartPosition.x, 2) +
+          Math.pow(currentPointerPosition.y - this._clickStartPosition.y, 2)
+      );
 
-      // Translate group by difference
+      // If we've moved beyond threshold, this is a drag operation
+      if (!this._pointerDragging && distance > this._clickThreshold) {
+        this._pointerDragging = true;
+
+        // Clear element selection candidate - this is now a drag, not a click
+        this._elementClickCandidate = -1;
+      }
+
+      // Perform transformation if dragging
       if (this._pointerDragging) {
         switch (this._transformHandle) {
           case "boxRotateTopLeft":
@@ -2009,10 +2022,6 @@ export class Transformer extends Container_ {
             if (this.translateEnabled) {
               const [worldOrigin, worldDestination, worldDelta] = tempHull;
 
-              // HINT: The pointer has moved from lastPointerPosition to currentPointerPosition in the
-              // transformer's world space. However, we want to translate the display-object's in their
-              // world space; to do this, we project (0,0) and the delta into their world-space, and take
-              // the difference.
               worldOrigin.set(0, 0);
               worldDestination.set(
                 currentPointerPosition.x - lastPointerPosition.x,
@@ -2033,20 +2042,12 @@ export class Transformer extends Container_ {
             }
           }
         }
-      } else {
-        this._transformHandle = this.wireframe.hitHandleType(
-          this.groupBounds,
-          this.projectionTransform,
-          currentPointerPosition
-        );
-        this.setCursorFromHoveredHandle(hoveredHandle);
+
+        e.stopPropagation();
       }
 
-      this._pointerPosition.x = cx;
-      this._pointerPosition.y = cy;
-      this._pointerDragging = true;
-
-      e.stopPropagation();
+      this._pointerPosition.x = currentPointerPosition.x;
+      this._pointerPosition.y = currentPointerPosition.y;
     }
 
     pointPool.release(currentPointerPosition);
@@ -2054,11 +2055,32 @@ export class Transformer extends Container_ {
 
   /** Called on the `pointerup` and `pointerupoutside` events. You must call the super implementation. */
   protected onPointerUp(e: FederatedPointerEvent): void {
+    const wasClick = !this._pointerDragging;
+
+    // Handle nested selection on click (not drag)
+    if (
+      wasClick &&
+      this.nestedSelectionEnabled &&
+      this._group.length > 1 &&
+      this._elementClickCandidate >= 0
+    ) {
+      const index = this._elementClickCandidate;
+
+      if (this._focusedElementIndex === index) {
+        // Click on already focused element: keep it focused
+        this.lazyDirty = true;
+      } else {
+        // Focus this element
+        this._focusedElementIndex = index;
+        this.lazyDirty = true;
+        this.emit("elementfocused", this._group[index], index);
+      }
+    }
+
+    // Clean up
     this._pointerDragging = false;
     this._pointerDown = false;
-
-    this.commitGroup();
-    e.stopPropagation();
+    this._elementClickCandidate = -1;
 
     if (this._pointerMoveTarget) {
       this._pointerMoveTarget.removeEventListener(
@@ -2067,6 +2089,9 @@ export class Transformer extends Container_ {
       );
       this._pointerMoveTarget = null;
     }
+
+    this.commitGroup();
+    e.stopPropagation();
   }
 
   /**
