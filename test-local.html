@@ -636,15 +636,16 @@
       circle.pivot.set(40, 40);
       circle.position.set(200, 200);
 
-      const star = app.stage.addChild(new PIXI.Graphics());
-      star.beginFill(0xf59e0b).drawStar(0, 0, 5, 60).endFill(); // Orange star
-      star.position.set(400, 200);
-      star.pivot.set(30, 30);
-
+      // Overlap test: place a square behind the star at the same position
       const rectangle = app.stage.addChild(new PIXI.Graphics());
-      rectangle.beginFill(0xef4444).drawRect(0, 0, 120, 80).endFill(); // Red rectangle
-      rectangle.position.set(600, 200);
-      rectangle.pivot.set(60, 40);
+      rectangle.beginFill(0x334155).drawRect(-60, -40, 120, 80).endFill(); // Slate square (behind)
+      rectangle.position.set(450, 220);
+      rectangle.pivot.set(0, 0);
+
+      const star = app.stage.addChild(new PIXI.Graphics());
+      star.beginFill(0xf59e0b).drawStar(0, 0, 5, 60).endFill(); // Orange star (on top)
+      star.position.set(450, 220);
+      star.pivot.set(30, 30);
 
       const triangle = app.stage.addChild(new PIXI.Graphics());
       triangle
@@ -687,7 +688,7 @@
         })
       );
       rectLabel.anchor.set(0.5);
-      rectLabel.y = -10;
+      rectLabel.y = 50;
 
       const triangleLabel = triangle.addChild(
         new PIXI.Text("Triangle", {
@@ -726,7 +727,7 @@
             rotateEnabled: true,
             boxRotationEnabled: true,
             transientGroupTilt: false,
-            group: [circle, star, rectangle, triangle], // All 4 shapes
+            group: [circle, rectangle, star, triangle], // Include overlapped elements; order shouldn't affect pick
             stage: app.stage,
             boundingBoxes: "all", // Must be "all" to show individual borders
 

@@ -1,0 +1,16 @@
+lockfileVersion: '6.0'
+
+settings:
+  autoInstallPeers: true
+  excludeLinksFromLockfile: false
+
+dependencies:
+  d-path-parser:
+    specifier: ^1.0.0
+    version: 1.0.0
+
+packages:
+
+  /d-path-parser@1.0.0:
+    resolution: {integrity: sha512-CY3xMMjZ0LfS0YFTLcrcZxb79yaJzdnDu7KRTZxsbTjCH11PzQSxgTGRxsFb4F4o4dU069B1InS5n3TUDP1XUg==}
+    dev: false

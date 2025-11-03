@@ -1943,6 +1943,8 @@ export class Transformer extends Container_ {
 
       this._elementClickCandidate = -1;
 
+      // Collect all candidates under the click
+      const candidates: number[] = [];
       for (let i = 0; i < this._group.length; i++) {
         const elementBounds = Transformer.calculateOrientedBounds(
           this._group[i],
@@ -1950,9 +1952,21 @@ export class Transformer extends Container_ {
         );
 
         if (elementBounds.contains(tempPoint.x, tempPoint.y)) {
-          this._elementClickCandidate = i;
-          break;
+          candidates.push(i);
         }
+      }
+
+      // Pick the top-most (front-most) candidate based on display order
+      if (candidates.length > 0) {
+        let topIndex = candidates[0];
+        for (let k = 1; k < candidates.length; k++) {
+          const a = this._group[topIndex];
+          const b = this._group[candidates[k]];
+          if (Transformer.isAboveInDisplayOrder(b, a)) {
+            topIndex = candidates[k];
+          }
+        }
+        this._elementClickCandidate = topIndex;
       }
     }
 
@@ -1973,6 +1987,56 @@ export class Transformer extends Container_ {
       "globalpointermove",
       this.onPointerMove
     );
+  }
+
+  /**
+   * Determine if display-object a is above display-object b in render order.
+   * This walks up the scene graph to the first diverging ancestor and
+   * compares their child indices (assuming parent's children array is in render order).
+   */
+  private static isAboveInDisplayOrder(
+    a: DisplayObject,
+    b: DisplayObject
+  ): boolean {
+    if (a === b) return false;
+
+    // Build ancestor chains up to roots (inclusive of self)
+    const pathA: DisplayObject[] = [];
+    const pathB: DisplayObject[] = [];
+
+    let cur: DisplayObject = a;
+    while (cur) {
+      pathA.push(cur);
+      cur = cur.parent as DisplayObject;
+    }
+
+    cur = b;
+    while (cur) {
+      pathB.push(cur);
+      cur = cur.parent as DisplayObject;
+    }
+
+    // Reverse so index 0 is root
+    pathA.reverse();
+    pathB.reverse();
+
+    // Find first divergence
+    const len = Math.min(pathA.length, pathB.length);
+    for (let i = 0; i < len; i++) {
+      if (pathA[i] !== pathB[i]) {
+        const parent = pathA[i - 1] as unknown as Container;
+        if (!parent || !parent.children) {
+          return false;
+        }
+        const idxA = parent.children.indexOf(pathA[i] as any);
+        const idxB = parent.children.indexOf(pathB[i] as any);
+        // Higher index renders later (on top)
+        return idxA > idxB;
+      }
+    }
+
+    // If one is ancestor of the other, deeper one renders above
+    return pathA.length > pathB.length;
   }
 
   /** Called on the `pointermove` event. You must call the super implementation. */
