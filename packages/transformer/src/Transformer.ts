@@ -372,6 +372,12 @@ export interface ITransformerOptions {
   /** Alpha/opacity for individual borders (0-1) */
   individualBorderAlpha?: number;
 
+  /** Style for individual element borders: 'solid' | 'dashed' | 'dotted' */
+  individualBorderStyle?: "solid" | "dashed" | "dotted";
+
+  /** Dash pattern for individual borders [dashLength, gapLength] */
+  individualBorderDashPattern?: [number, number];
+
   /** Enable nested selection (click to select individual elements within group) */
   nestedSelectionEnabled?: boolean;
 
@@ -380,6 +386,12 @@ export interface ITransformerOptions {
 
   /** Thickness for focused element border */
   focusedElementBorderThickness?: number;
+
+  /** Style for focused element border: 'solid' | 'dashed' | 'dotted' */
+  focusedElementBorderStyle?: "solid" | "dashed" | "dotted";
+
+  /** Dash pattern for focused element border [dashLength, gapLength] */
+  focusedElementBorderDashPattern?: [number, number];
 
   /** Whether to show individual borders for non-focused elements */
   showNonFocusedBorders?: boolean;
@@ -472,6 +484,12 @@ export class Transformer extends Container_ {
   /** Alpha for individual element borders */
   public individualBorderAlpha: number;
 
+  /** Style for individual element borders */
+  public individualBorderStyle: "solid" | "dashed" | "dotted";
+
+  /** Dash pattern for individual borders */
+  public individualBorderDashPattern: [number, number];
+
   /** Enable nested selection (click to select individual elements within group) */
   public nestedSelectionEnabled: boolean;
 
@@ -480,6 +498,12 @@ export class Transformer extends Container_ {
 
   /** Thickness for focused element border */
   public focusedElementBorderThickness?: number;
+
+  /** Style for focused element border */
+  public focusedElementBorderStyle: "solid" | "dashed" | "dotted";
+
+  /** Dash pattern for focused element border */
+  public focusedElementBorderDashPattern: [number, number];
 
   /** Show borders for non-focused elements */
   public showNonFocusedBorders: boolean;
@@ -747,6 +771,12 @@ export class Transformer extends Container_ {
         ? options.individualBorderAlpha
         : 1.0;
 
+    this.individualBorderStyle = options.individualBorderStyle || "solid";
+
+    this.individualBorderDashPattern = options.individualBorderDashPattern || [
+      8, 4,
+    ];
+
     // Initialize nested selection (Canva-style behavior)
     this.nestedSelectionEnabled =
       options.nestedSelectionEnabled !== undefined
@@ -759,6 +789,12 @@ export class Transformer extends Container_ {
         : 0x8b5cf6; // Purple for focused element
 
     this.focusedElementBorderThickness = options.focusedElementBorderThickness;
+
+    this.focusedElementBorderStyle =
+      options.focusedElementBorderStyle || "dashed";
+
+    this.focusedElementBorderDashPattern =
+      options.focusedElementBorderDashPattern || [8, 4];
 
     this.showNonFocusedBorders =
       options.showNonFocusedBorders !== undefined
@@ -1356,6 +1392,216 @@ export class Transformer extends Container_ {
   }
 
   /**
+   * Draws a dashed rectangle around the given bounds
+   */
+  private drawDashedBounds(
+    bounds: OrientedBounds,
+    dashLength: number,
+    gapLength: number,
+    color: number,
+    thickness: number,
+    alpha: number = 1.0
+  ): void {
+    const { topLeft, topRight, bottomLeft, bottomRight } = bounds;
+
+    // Draw each edge as a dashed line
+    this.drawDashedLineSegment(
+      topLeft.x,
+      topLeft.y,
+      topRight.x,
+      topRight.y,
+      dashLength,
+      gapLength,
+      color,
+      thickness,
+      alpha
+    );
+    this.drawDashedLineSegment(
+      topRight.x,
+      topRight.y,
+      bottomRight.x,
+      bottomRight.y,
+      dashLength,
+      gapLength,
+      color,
+      thickness,
+      alpha
+    );
+    this.drawDashedLineSegment(
+      bottomRight.x,
+      bottomRight.y,
+      bottomLeft.x,
+      bottomLeft.y,
+      dashLength,
+      gapLength,
+      color,
+      thickness,
+      alpha
+    );
+    this.drawDashedLineSegment(
+      bottomLeft.x,
+      bottomLeft.y,
+      topLeft.x,
+      topLeft.y,
+      dashLength,
+      gapLength,
+      color,
+      thickness,
+      alpha
+    );
+  }
+
+  /**
+   * Draws a dotted rectangle around the given bounds
+   */
+  private drawDottedBounds(
+    bounds: OrientedBounds,
+    dotSize: number,
+    gapLength: number,
+    color: number,
+    alpha: number = 1.0
+  ): void {
+    const { topLeft, topRight, bottomLeft, bottomRight } = bounds;
+
+    // Draw each edge as a dotted line
+    this.drawDottedLineSegment(
+      topLeft.x,
+      topLeft.y,
+      topRight.x,
+      topRight.y,
+      dotSize,
+      gapLength,
+      color,
+      alpha
+    );
+    this.drawDottedLineSegment(
+      topRight.x,
+      topRight.y,
+      bottomRight.x,
+      bottomRight.y,
+      dotSize,
+      gapLength,
+      color,
+      alpha
+    );
+    this.drawDottedLineSegment(
+      bottomRight.x,
+      bottomRight.y,
+      bottomLeft.x,
+      bottomLeft.y,
+      dotSize,
+      gapLength,
+      color,
+      alpha
+    );
+    this.drawDottedLineSegment(
+      bottomLeft.x,
+      bottomLeft.y,
+      topLeft.x,
+      topLeft.y,
+      dotSize,
+      gapLength,
+      color,
+      alpha
+    );
+  }
+
+  /**
+   * Draws a dashed line segment between two points
+   */
+  private drawDashedLineSegment(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    dashLength: number,
+    gapLength: number,
+    color: number,
+    thickness: number,
+    alpha: number = 1.0
+  ): void {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance === 0) return;
+
+    const unitX = dx / distance;
+    const unitY = dy / distance;
+
+    const dashCount = Math.floor(distance / (dashLength + gapLength));
+
+    this.wireframe.lineStyle(thickness, color, alpha);
+
+    for (let i = 0; i < dashCount; i++) {
+      const startX = x1 + unitX * i * (dashLength + gapLength);
+      const startY = y1 + unitY * i * (dashLength + gapLength);
+      const endX = Math.min(x2, startX + unitX * dashLength);
+      const endY = Math.min(y2, startY + unitY * dashLength);
+
+      this.wireframe.moveTo(startX, startY).lineTo(endX, endY);
+    }
+
+    // Draw remaining segment if any
+    const remainingDistance = distance - dashCount * (dashLength + gapLength);
+    if (remainingDistance > 0) {
+      const startX = x1 + unitX * dashCount * (dashLength + gapLength);
+      const startY = y1 + unitY * dashCount * (dashLength + gapLength);
+      const endDistance = Math.min(dashLength, remainingDistance);
+      const endX = startX + unitX * endDistance;
+      const endY = startY + unitY * endDistance;
+
+      this.wireframe.moveTo(startX, startY).lineTo(endX, endY);
+    }
+  }
+
+  /**
+   * Draws a dotted line segment between two points
+   * Each dot is drawn as an independent shape to ensure proper rendering
+   */
+  private drawDottedLineSegment(
+    x1: number,
+    y1: number,
+    x2: number,
+    y2: number,
+    dotSize: number,
+    gapLength: number,
+    color: number,
+    alpha: number = 1.0
+  ): void {
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const distance = Math.sqrt(dx * dx + dy * dy);
+
+    if (distance === 0) return;
+
+    // Normalize direction vector
+    const unitX = dx / distance;
+    const unitY = dy / distance;
+
+    // Calculate spacing between dot centers (diameter + gap)
+    const spacing = dotSize * 2 + gapLength;
+
+    // Minimum 2 dots so we cover both ends; if distance is very small, fall back to 1
+    const numDots = Math.max(1, Math.floor(distance / spacing) + 1);
+
+    // Evenly distribute dots along the full length so first and last are at ends
+    const adjustedSpacing = numDots > 1 ? distance / (numDots - 1) : 0;
+
+    for (let i = 0; i < numDots; i++) {
+      const t = adjustedSpacing * i; // distance along the segment
+      const dotX = x1 + unitX * t;
+      const dotY = y1 + unitY * t;
+
+      this.wireframe
+        .lineStyle(0)
+        .beginFill(color, alpha)
+        .drawCircle(dotX, dotY, dotSize)
+        .endFill();
+    }
+  }
+
+  /**
    * @param forceUpdate - forces a recalculation of the group bounds
    * @returns the oriented bounding box of the wireframe
    */
@@ -1457,7 +1703,6 @@ export class Transformer extends Container_ {
     this._transformHandle = handle;
     this._transformType = "scale";
 
-    // Directions along x,y axes that will produce positive scaling
     const xDir = SCALE_COMPONENTS[handle].x;
     const yDir = SCALE_COMPONENTS[handle].y;
 
@@ -1494,11 +1739,19 @@ export class Transformer extends Container_ {
     const du = dx * uxvec + dy * uyvec;
     const dv = dx * vxvec + dy * vyvec;
 
-    // Scaling factors along x,y axes
-    let sx = 1 + (du * xDir) / innerBounds.width;
-    let sy = 1 + (dv * yDir) / innerBounds.height;
+    // Calculate scaling factors along x,y axes based on the delta
+    let sx = 1;
+    let sy = 1;
 
-    // Only lock aspect ratio if using a handle that scales along both axes.
+    if (xDir !== 0) {
+      sx = 1 + (du * xDir) / innerBounds.width;
+    }
+
+    if (yDir !== 0) {
+      sy = 1 + (dv * yDir) / innerBounds.height;
+    }
+
+    // Only lock aspect ratio if using a handle that scales along both axes
     const lockAspectRatio =
       this.lockAspectRatio &&
       (handle === "topLeft" ||
@@ -1506,57 +1759,95 @@ export class Transformer extends Container_ {
         handle === "bottomLeft" ||
         handle === "bottomRight");
 
+    // Prevent negative/zero scaling first
+    const minScale = 0.01;
+    if (sx < minScale) sx = minScale;
+    if (sy < minScale) sy = minScale;
+
     if (lockAspectRatio) {
-      if (sx > sy) {
+      // Use the larger absolute scale value to maintain aspect ratio
+      // This prevents flickering by choosing the dominant axis consistently
+      // Compare absolute values to determine which axis has moved more
+      const absSx = Math.abs(sx);
+      const absSy = Math.abs(sy);
+
+      // Use a small threshold to prevent rapid switching between axes
+      const threshold = 0.001;
+
+      if (absSx > absSy + threshold) {
+        // X axis has moved more - lock Y to X
         sy = sx;
-      } else {
+      } else if (absSy > absSx + threshold) {
+        // Y axis has moved more - lock X to Y
         sx = sy;
+      } else {
+        // Values are very close - use the average to prevent oscillation
+        const avg = (sx + sy) / 2;
+        sx = avg;
+        sy = avg;
       }
     }
 
-    const matrix = tempMatrix.identity();
+    // Calculate the scale origin based on handle direction
+    let scaleOrigin: Point;
 
-    // NOTE: Do not apply scaling when sx,sy = 0 to prevent matrices from being degenerate.
-
-    if (xDir !== 0 && sx !== 0) {
-      // Origin of horizontal scaling - a point which does not move after applying the transform
-      // eslint-disable-next-line no-nested-ternary
-      const hsOrigin = !this.centeredScaling
-        ? xDir === 1
-          ? bounds.topLeft
-          : bounds.topRight
-        : bounds.center;
-
-      matrix
-        .translate(-hsOrigin.x, -hsOrigin.y)
-        .rotate(-angle)
-        .scale(sx, 1)
-        .rotate(angle)
-        .translate(hsOrigin.x, hsOrigin.y);
+    if (this.centeredScaling) {
+      scaleOrigin = bounds.center;
+    } else {
+      // Determine scale origin based on which edge/corner is being dragged
+      // The origin should be the OPPOSITE corner/edge from the handle
+      if (xDir === 1 && yDir === 1) {
+        // Bottom-right corner -> scale from top-left
+        scaleOrigin = bounds.topLeft;
+      } else if (xDir === -1 && yDir === 1) {
+        // Bottom-left corner -> scale from top-right
+        scaleOrigin = bounds.topRight;
+      } else if (xDir === 1 && yDir === -1) {
+        // Top-right corner -> scale from bottom-left
+        scaleOrigin = bounds.bottomLeft;
+      } else if (xDir === -1 && yDir === -1) {
+        // Top-left corner -> scale from bottom-right
+        scaleOrigin = bounds.bottomRight;
+      } else if (yDir === 1) {
+        // Bottom edge -> scale from top-center
+        scaleOrigin = new Point(
+          (bounds.topLeft.x + bounds.topRight.x) / 2,
+          (bounds.topLeft.y + bounds.topRight.y) / 2
+        );
+      } else if (yDir === -1) {
+        // Top edge -> scale from bottom-center
+        scaleOrigin = new Point(
+          (bounds.bottomLeft.x + bounds.bottomRight.x) / 2,
+          (bounds.bottomLeft.y + bounds.bottomRight.y) / 2
+        );
+      } else if (xDir === 1) {
+        // Right edge -> scale from middle-left
+        scaleOrigin = new Point(
+          (bounds.topLeft.x + bounds.bottomLeft.x) / 2,
+          (bounds.topLeft.y + bounds.bottomLeft.y) / 2
+        );
+      } else if (xDir === -1) {
+        // Left edge -> scale from middle-right
+        scaleOrigin = new Point(
+          (bounds.topRight.x + bounds.bottomRight.x) / 2,
+          (bounds.topRight.y + bounds.bottomRight.y) / 2
+        );
+      } else {
+        // Fallback to center
+        scaleOrigin = bounds.center;
+      }
     }
 
-    if (yDir !== 0 && sy !== 0) {
-      // Origin of vertical scaling - a point which does not move after applying the transform
-      // eslint-disable-next-line no-nested-ternary
-      const vsOrigin = !this.centeredScaling
-        ? yDir === 1
-          ? bounds.topLeft
-          : bounds.bottomLeft
-        : bounds.center;
+    // Create a single transformation matrix that scales from the origin
+    const matrix = tempMatrix
+      .identity()
+      .translate(-scaleOrigin.x, -scaleOrigin.y)
+      .rotate(-angle)
+      .scale(sx, sy)
+      .rotate(angle)
+      .translate(scaleOrigin.x, scaleOrigin.y);
 
-      matrix
-        .translate(-vsOrigin.x, -vsOrigin.y)
-        .rotate(-angle)
-        .scale(1, sy)
-        .rotate(angle)
-        .translate(vsOrigin.x, vsOrigin.y);
-    }
-
-    // Handles flips along x & y axis. Handles are always flipped along the y-axis, however. This is
-    // because a negative x-scale adds 180° to the rotation - as a result, the handles are automatically
-    // flipped along the x-axis but also the y-axis - and this needs to be reversed (by flipping again).
-    //
-    // NOTE: When both x & y axes are flipped, then there is no need for swapping b/c they cancel out.
+    // Handle flips for corner handles
     if ((sy < 0 || sx < 0) && !(sy < 0 && sx < 0)) {
       switch (handle) {
         case "topLeft":
@@ -1707,25 +1998,73 @@ export class Transformer extends Container_ {
           (this.showNonFocusedBorders && this._focusedElementIndex === -1);
 
         if (shouldShow) {
-          // Draw focused element with special color and thickness
-          if (isFocused) {
-            this.wireframe.lineStyle(
-              focusedThickness,
-              this.focusedElementBorderColor,
-              1.0
-            );
-          } else {
-            // Draw non-focused elements in cyan
-            this.wireframe.lineStyle(
-              individualThickness,
-              this.individualBorderColor,
-              this.individualBorderAlpha
-            );
-          }
-
-          this.wireframe.drawBounds(
-            Transformer.calculateOrientedBounds(targets[i], tempBounds)
+          const elementBounds = Transformer.calculateOrientedBounds(
+            targets[i],
+            tempBounds
           );
+
+          if (isFocused) {
+            // Draw focused element with styled border
+            const [dashLength, gapLength] =
+              this.focusedElementBorderDashPattern;
+
+            if (this.focusedElementBorderStyle === "dashed") {
+              this.drawDashedBounds(
+                elementBounds,
+                dashLength,
+                gapLength,
+                this.focusedElementBorderColor,
+                focusedThickness,
+                1.0
+              );
+            } else if (this.focusedElementBorderStyle === "dotted") {
+              this.drawDottedBounds(
+                elementBounds,
+                dashLength,
+                gapLength,
+                this.focusedElementBorderColor,
+                1.0
+              );
+            } else {
+              // Solid style
+              this.wireframe.lineStyle(
+                focusedThickness,
+                this.focusedElementBorderColor,
+                1.0
+              );
+              this.wireframe.drawBounds(elementBounds);
+            }
+          } else {
+            // Draw non-focused elements with their style
+            const [dashLength, gapLength] = this.individualBorderDashPattern;
+
+            if (this.individualBorderStyle === "dashed") {
+              this.drawDashedBounds(
+                elementBounds,
+                dashLength,
+                gapLength,
+                this.individualBorderColor,
+                individualThickness,
+                this.individualBorderAlpha
+              );
+            } else if (this.individualBorderStyle === "dotted") {
+              this.drawDottedBounds(
+                elementBounds,
+                dashLength,
+                gapLength,
+                this.individualBorderColor,
+                this.individualBorderAlpha
+              );
+            } else {
+              // Solid style
+              this.wireframe.lineStyle(
+                individualThickness,
+                this.individualBorderColor,
+                this.individualBorderAlpha
+              );
+              this.wireframe.drawBounds(elementBounds);
+            }
+          }
         }
       }
     }

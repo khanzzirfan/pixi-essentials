@@ -4,7 +4,7 @@
   "description": "Essential plugins for PixiJS applications - Fork with modern Canva-style transformer",
   "main": "index.js",
   "scripts": {
-    "prepare": "rush install",
+    "prepare": "node common/scripts/install-run-rush.js install",
     "build:compile": "rush build",
     "build:types": "rush build:types",
     "build": "npm run build:compile && npm run build:types",

@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Multiple Element Group Transformer Test</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 20px;
+        font-family: Arial, sans-serif;
+        background: #1a1a1a;
+        color: #fff;
+      }
+      #pen-canvas {
+        border: 2px solid #6366f1;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      }
+      .controls {
+        background: #2a2a2a;
+        border: 1px solid #444;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      .controls h3 {
+        margin: 0 0 15px 0;
+        color: #6366f1;
+      }
+      .control-group {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 10px;
+        flex-wrap: wrap;
+      }
+      .control-group label {
+        font-weight: 600;
+        min-width: 150px;
+      }
+      button {
+        padding: 8px 16px;
+        border: 2px solid #6366f1;
+        border-radius: 6px;
+        background: #6366f1;
+        color: white;
+        cursor: pointer;
+        font-size: 14px;
+        transition: all 0.2s ease;
+        margin-right: 5px;
+        margin-bottom: 5px;
+      }
+      button:hover {
+        background: #4f46e5;
+        border-color: #4f46e5;
+        transform: translateY(-2px);
+      }
+      button.active {
+        background: #10b981;
+        border-color: #10b981;
+      }
+      .info {
+        background: #1e3a5f;
+        border: 1px solid #3b82f6;
+        border-radius: 8px;
+        padding: 15px;
+        margin-bottom: 20px;
+      }
+      .info h3 {
+        margin: 0 0 10px 0;
+        color: #60a5fa;
+      }
+      .info p {
+        margin: 5px 0;
+        font-size: 14px;
+        color: #93c5fd;
+      }
+      .info ul {
+        margin: 10px 0;
+        padding-left: 20px;
+      }
+      .info li {
+        margin: 5px 0;
+        color: #93c5fd;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Multiple Element Group Transformer Test</h1>
+
+    <div class="info">
+      <h3>🎯 Testing Group Scaling with Multiple Elements</h3>
+      <p>
+        <strong>Purpose:</strong> Test scaling behavior with multiple grouped
+        elements
+      </p>
+      <p>
+        <strong>Test:</strong> Try dragging different handles (corners and
+        edges) to verify scaling works correctly for all elements in the group
+      </p>
+      <ul>
+        <li>
+          <strong>Bottom-right handle</strong> → scales from top-left (all
+          elements scale together)
+        </li>
+        <li>
+          <strong>Top-center handle</strong> → scales from bottom-center (top
+          edge stays fixed)
+        </li>
+        <li>
+          <strong>Elements maintain spacing</strong> → relative positions
+          preserved during scaling
+        </li>
+        <li>
+          <strong>No overlap</strong> → elements should scale proportionally
+          without overlapping
+        </li>
+      </ul>
+    </div>
+
+    <div class="controls">
+      <h3>🎨 Element Management</h3>
+      <div class="control-group">
+        <label>Add Elements:</label>
+        <button onclick="addElement('circle')">Add Circle</button>
+        <button onclick="addElement('rectangle')">Add Rectangle</button>
+        <button onclick="addElement('star')">Add Star</button>
+        <button onclick="addElement('triangle')">Add Triangle</button>
+      </div>
+      <div class="control-group">
+        <label>Actions:</label>
+        <button onclick="clearAll()">Clear All</button>
+        <button onclick="resetLayout()">Reset Layout</button>
+      </div>
+    </div>
+
+    <div class="controls">
+      <h3>⚙️ Transformer Settings</h3>
+      <div class="control-group">
+        <label>Centered Scaling:</label>
+        <button onclick="toggleCenteredScaling()" id="centered-btn">
+          Disabled
+        </button>
+      </div>
+      <div class="control-group">
+        <label>Lock Aspect Ratio:</label>
+        <button onclick="toggleLockAspectRatio()" id="aspect-btn">
+          Disabled
+        </button>
+      </div>
+      <div class="control-group">
+        <label>Show Individual Borders:</label>
+        <button onclick="toggleIndividualBorders()" id="borders-btn">
+          Enabled
+        </button>
+      </div>
+    </div>
+
+    <canvas id="pen-canvas"></canvas>
+
+    <!-- CodePen-style imports -->
+    <script src="https://pixijs.download/v7.2.4/pixi.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@pixi/graphics-extras@7.1.4/dist/graphics-extras.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@pixi-essentials/object-pool@1.0.1/dist/pixi-object-pool.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@pixi-essentials/bounds@3.0.0/dist/bounds.js"></script>
+    <script src="./packages/transformer/dist/transformer.js"></script>
+
+    <script>
+      const app = new PIXI.Application({
+        width: 1024,
+        height: 768,
+        autoDensity: true,
+        resolution: window.devicePixelRatio || 1,
+        view: document.getElementById("pen-canvas"),
+        backgroundColor: 0x1a1a1a,
+        antialias: true,
+      });
+
+      app.stage.interactive = true;
+      app.stage.eventMode = "static";
+
+      let transformer = null;
+      const elements = [];
+      let elementCounter = 0;
+
+      // Initialize SVG textures for rotator handles
+      if (PIXI.TransformerHandle && PIXI.TransformerHandle.loadTextures) {
+        PIXI.TransformerHandle.loadTextures()
+          .then(() => {
+            console.log("SVG textures loaded successfully!");
+            createInitialLayout();
+          })
+          .catch((error) => {
+            console.warn("SVG texture loading failed, using fallback:", error);
+            createInitialLayout();
+          });
+      } else {
+        console.warn(
+          "TransformerHandle not found, creating transformer without SVG"
+        );
+        createInitialLayout();
+      }
+
+      function createInitialLayout() {
+        // Create initial set of elements for testing
+        addElement("circle", 200, 200);
+        addElement("rectangle", 400, 200);
+        addElement("star", 600, 200);
+        addElement("triangle", 800, 200);
+      }
+
+      function addElement(type, x, y) {
+        // Generate position if not provided
+        if (x === undefined || y === undefined) {
+          x = 200 + (elements.length % 4) * 200;
+          y = 200 + Math.floor(elements.length / 4) * 150;
+        }
+
+        let shape;
+        let labelText;
+        const colors = [
+          0x4ade80, // green
+          0x6366f1, // indigo
+          0xf59e0b, // orange
+          0x8b5cf6, // purple
+          0xef4444, // red
+          0x06b6d4, // cyan
+        ];
+        const color = colors[elementCounter % colors.length];
+        elementCounter++;
+
+        switch (type) {
+          case "circle":
+            shape = new PIXI.Graphics();
+            shape.beginFill(color).drawCircle(0, 0, 50).endFill();
+            shape.pivot.set(50, 50);
+            shape.position.set(x, y);
+            labelText = `Circle ${elements.length + 1}`;
+            break;
+
+          case "rectangle":
+            shape = new PIXI.Graphics();
+            shape.beginFill(color).drawRect(-60, -40, 120, 80).endFill();
+            shape.pivot.set(0, 0);
+            shape.position.set(x, y);
+            labelText = `Rect ${elements.length + 1}`;
+            break;
+
+          case "star":
+            shape = new PIXI.Graphics();
+            shape.beginFill(color).drawStar(0, 0, 5, 50).endFill();
+            shape.pivot.set(25, 25);
+            shape.position.set(x, y);
+            labelText = `Star ${elements.length + 1}`;
+            break;
+
+          case "triangle":
+            shape = new PIXI.Graphics();
+            shape
+              .beginFill(color)
+              .drawPolygon([
+                new PIXI.Point(0, -40),
+                new PIXI.Point(-40, 40),
+                new PIXI.Point(40, 40),
+              ])
+              .endFill();
+            shape.pivot.set(0, 0);
+            shape.position.set(x, y);
+            labelText = `Tri ${elements.length + 1}`;
+            break;
+
+          default:
+            shape = new PIXI.Graphics();
+            shape.beginFill(color).drawRect(-60, -40, 120, 80).endFill();
+            shape.pivot.set(0, 0);
+            shape.position.set(x, y);
+            labelText = `Shape ${elements.length + 1}`;
+        }
+
+        app.stage.addChild(shape);
+        elements.push(shape);
+
+        // Add label as a child (will scale with shape for testing)
+        const label = shape.addChild(
+          new PIXI.Text(labelText, {
+            fontSize: 14,
+            fill: 0xffffff,
+            fontWeight: "bold",
+          })
+        );
+        label.anchor.set(0.5);
+        label.y = -60;
+
+        // Update transformer
+        updateTransformer();
+
+        console.log(`Added ${type} at (${x}, ${y})`);
+        console.log(`Total elements: ${elements.length}`);
+      }
+
+      function updateTransformer() {
+        // Remove existing transformer
+        if (transformer) {
+          app.stage.removeChild(transformer);
+          transformer = null;
+        }
+
+        // Don't create transformer if no elements
+        if (elements.length === 0) {
+          return;
+        }
+
+        // Create new transformer with all elements
+        transformer = app.stage.addChild(
+          new PIXI.Transformer({
+            rotateEnabled: true,
+            boxRotationEnabled: true,
+            transientGroupTilt: false,
+            centeredScaling: false, // Scale from edges/corners, not center
+            group: elements, // All elements in the group
+            stage: app.stage,
+            boundingBoxes: "all", // Show individual borders
+            lockAspectRatio: false,
+
+            wireframeStyle: {
+              thickness: 2,
+              color: 0x6366f1,
+            },
+            colorTheme: {
+              primary: 0x6366f1,
+              secondary: 0x4f46e5,
+              background: 0xffffff,
+              glow: 0x6366f1,
+              glowIntensity: 0.15,
+            },
+            // Individual element borders
+            individualBorderColor: 0x00d4ff, // Cyan
+            individualBorderThickness: 1.5,
+            individualBorderAlpha: 0.8,
+            individualBorderStyle: "dotted", // Test dotted borders
+            individualBorderDashPattern: [2, 3], // [dotSize, gapLength] - smaller dots with tighter spacing
+          })
+        );
+
+        console.log("Transformer updated with", elements.length, "elements");
+      }
+
+      function clearAll() {
+        // Remove all elements
+        elements.forEach((element) => {
+          app.stage.removeChild(element);
+        });
+        elements.length = 0;
+        elementCounter = 0;
+
+        // Remove transformer
+        if (transformer) {
+          app.stage.removeChild(transformer);
+          transformer = null;
+        }
+
+        console.log("Cleared all elements");
+      }
+
+      function resetLayout() {
+        // Reset all elements to a grid layout
+        elements.forEach((element, index) => {
+          const x = 200 + (index % 4) * 200;
+          const y = 200 + Math.floor(index / 4) * 150;
+          element.position.set(x, y);
+          element.scale.set(1, 1);
+          element.rotation = 0;
+        });
+
+        // Update transformer
+        updateTransformer();
+
+        console.log("Reset layout for", elements.length, "elements");
+      }
+
+      function toggleCenteredScaling() {
+        if (!transformer) return;
+
+        transformer.centeredScaling = !transformer.centeredScaling;
+        const button = document.getElementById("centered-btn");
+        button.textContent = transformer.centeredScaling
+          ? "Enabled"
+          : "Disabled";
+        button.className = transformer.centeredScaling ? "active" : "";
+
+        console.log(
+          "Centered scaling:",
+          transformer.centeredScaling ? "enabled" : "disabled"
+        );
+      }
+
+      function toggleLockAspectRatio() {
+        if (!transformer) return;
+
+        transformer.lockAspectRatio = !transformer.lockAspectRatio;
+        const button = document.getElementById("aspect-btn");
+        button.textContent = transformer.lockAspectRatio
+          ? "Enabled"
+          : "Disabled";
+        button.className = transformer.lockAspectRatio ? "active" : "";
+
+        console.log(
+          "Lock aspect ratio:",
+          transformer.lockAspectRatio ? "enabled" : "disabled"
+        );
+      }
+
+      function toggleIndividualBorders() {
+        if (!transformer) return;
+
+        const currentValue = transformer.boundingBoxes;
+        transformer.boundingBoxes =
+          currentValue === "all" ? "groupOnly" : "all";
+        const button = document.getElementById("borders-btn");
+        button.textContent =
+          transformer.boundingBoxes === "all" ? "Enabled" : "Disabled";
+        button.className = transformer.boundingBoxes === "all" ? "active" : "";
+
+        console.log(
+          "Individual borders:",
+          transformer.boundingBoxes === "all" ? "enabled" : "disabled"
+        );
+      }
+
+      // Listen to transform events
+      function setupTransformListeners() {
+        if (transformer) {
+          transformer.on("transformchange", (matrix) => {
+            // Optional: log transform changes
+            // console.log("Transform changed:", matrix);
+          });
+
+          transformer.on("transformcommit", () => {
+            console.log("Transform committed");
+          });
+        }
+      }
+
+      // Update listeners when transformer is created
+      const originalUpdateTransformer = updateTransformer;
+      updateTransformer = function () {
+        originalUpdateTransformer();
+        setupTransformListeners();
+      };
+    </script>
+  </body>
+</html>

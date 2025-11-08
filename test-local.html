@@ -1,79 +1,50 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Transformer Test v1.0.9-alpha.6</title>
+    <title>Dynamic Text Font Size Best-Fit Algorithm Test</title>
     <style>
       body {
         margin: 0;
         padding: 20px;
         font-family: Arial, sans-serif;
+        background: #f5f5f5;
       }
       #pen-canvas {
-        border: 1px solid #ccc;
+        border: 2px solid #6366f1;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        background: #ffffff;
       }
 
-      .theme-btn {
-        padding: 8px 16px;
-        border: 2px solid #ddd;
-        border-radius: 6px;
-        background: white;
-        cursor: pointer;
+      .info-box {
+        background: #e0f2fe;
+        border: 2px solid #0ea5e9;
+        border-radius: 8px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+
+      .info-box h2 {
+        margin: 0 0 10px 0;
+        color: #0c4a6e;
+      }
+
+      .info-box p {
+        margin: 5px 0;
+        color: #0c4a6e;
         font-size: 14px;
-        transition: all 0.2s ease;
-        font-weight: 500;
       }
 
-      .theme-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      .info-box ul {
+        margin: 10px 0;
+        padding-left: 20px;
       }
 
-      .theme-btn.active {
-        border-color: #6366f1;
-        background: #6366f1;
-        color: white;
-        box-shadow: 0 2px 4px rgba(99, 102, 241, 0.3);
+      .info-box li {
+        margin: 5px 0;
+        color: #0c4a6e;
       }
 
-      .theme-btn[data-color="0x6366f1"] {
-        border-left: 4px solid #6366f1;
-      }
-      .theme-btn[data-color="0xff6b6b"] {
-        border-left: 4px solid #ff6b6b;
-      }
-      .theme-btn[data-color="0x45b7d1"] {
-        border-left: 4px solid #45b7d1;
-      }
-      .theme-btn[data-color="0x4ecdc4"] {
-        border-left: 4px solid #4ecdc4;
-      }
-      .theme-btn[data-color="0x2ecc71"] {
-        border-left: 4px solid #2ecc71;
-      }
-      .theme-btn[data-color="0x6c5ce7"] {
-        border-left: 4px solid #6c5ce7;
-      }
-      .theme-btn[data-color="0xf0932b"] {
-        border-left: 4px solid #f0932b;
-      }
-      .theme-btn[data-color="0xeb4d4b"] {
-        border-left: 4px solid #eb4d4b;
-      }
-      .theme-btn[data-color="0xf9ca24"] {
-        border-left: 4px solid #f9ca24;
-      }
-      .theme-btn[data-color="0x44aaff"] {
-        border-left: 4px solid #44aaff;
-      }
-
-      .theme-btn:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-        transform: none !important;
-        box-shadow: none !important;
-      }
-
-      /* Rotator Anchor Controls */
       .controls-section {
         background: #f8f9fa;
         border: 1px solid #e9ecef;
@@ -106,1364 +77,865 @@
         font-size: 14px;
       }
 
-      .style-btn,
-      .preset-btn,
-      .toggle-btn {
-        padding: 8px 12px;
-        border: 1px solid #dee2e6;
-        border-radius: 4px;
-        background: #fff;
-        cursor: pointer;
-        font-size: 12px;
-        transition: all 0.2s;
-        margin-right: 5px;
-        margin-bottom: 5px;
-      }
-
-      .style-btn:hover,
-      .preset-btn:hover,
-      .toggle-btn:hover {
-        background: #e9ecef;
-        border-color: #adb5bd;
-      }
-
-      .style-btn.active {
+      button {
+        padding: 10px 20px;
+        border: 2px solid #6366f1;
+        border-radius: 6px;
         background: #6366f1;
         color: white;
-        border-color: #6366f1;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s ease;
+        margin-right: 10px;
+        margin-bottom: 10px;
       }
 
-      .toggle-btn.enabled {
-        background: #28a745;
-        color: white;
-        border-color: #28a745;
+      button:hover {
+        background: #4f46e5;
+        border-color: #4f46e5;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
       }
 
-      .toggle-btn.disabled {
-        background: #dc3545;
-        color: white;
-        border-color: #dc3545;
+      button.active {
+        background: #10b981;
+        border-color: #10b981;
       }
 
-      input[type="range"] {
-        width: 100%;
-        margin: 5px 0;
-      }
-
-      .pattern-controls {
-        display: flex;
-        align-items: center;
-        gap: 10px;
-        flex-wrap: wrap;
-      }
-
-      .pattern-controls input[type="range"] {
-        width: 80px;
-        margin: 0;
-      }
-
-      .pattern-controls span {
+      .status-display {
+        background: #f1f5f9;
+        border: 1px solid #cbd5e1;
+        border-radius: 6px;
+        padding: 15px;
+        margin-top: 10px;
+        font-family: monospace;
         font-size: 12px;
-        color: #6c757d;
-        min-width: 30px;
+        color: #334155;
+      }
+
+      .status-display strong {
+        color: #1e293b;
+      }
+
+      .comparison-section {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+        margin-bottom: 20px;
+      }
+
+      .comparison-box {
+        background: #f8f9fa;
+        border: 2px solid #e9ecef;
+        border-radius: 8px;
+        padding: 15px;
+      }
+
+      .comparison-box h4 {
+        margin: 0 0 10px 0;
+        color: #495057;
+      }
+
+      .comparison-box.scaled {
+        border-color: #f59e0b;
+      }
+
+      .comparison-box.dynamic {
+        border-color: #10b981;
+      }
+
+      .info {
+        background: #dbeafe;
+        border: 1px solid #3b82f6;
+        color: #1e40af;
+        padding: 10px;
+        border-radius: 6px;
+        margin-top: 10px;
+        font-size: 13px;
       }
     </style>
   </head>
   <body>
-    <h1>Modern Canva-Style Transformer Test v1.0.9-alpha.6</h1>
+    <h1>🔍 Dynamic Text Font Size Best-Fit Algorithm Test</h1>
 
-    <!-- Canva-Style Individual Borders Info -->
-    <div
-      style="
-        background: #f0f9ff;
-        border: 1px solid #0ea5e9;
-        border-radius: 8px;
-        padding: 15px;
-        margin-bottom: 20px;
-      "
-    >
-      <h3 style="margin: 0 0 10px 0; color: #0c4a6e">
-        🎨 Canva-Style Individual Borders
-      </h3>
-      <p style="margin: 0; color: #0c4a6e; font-size: 14px">
-        <strong>🎯 NEW: Nested Selection Feature!</strong><br />
-        • <strong>First element auto-focused</strong> - Circle is focused by
-        default (purple border)<br />
-        • <strong>Click to maintain</strong> - Click on focused element to keep
-        it focused (no cycling)<br />
-        • <strong>Click to focus</strong> - Click on different element to focus
-        it<br />
-        • <strong>Always one focused</strong> - Like Canva, there's always one
-        element with purple border<br />
-        • <strong>Group border</strong> - Purple border around entire
-        selection<br />
-        <em
-          >Try clicking on the shapes to see the nested selection in action!</em
-        >
+    <div class="info-box">
+      <h2>🎯 Test Purpose</h2>
+      <p>
+        <strong>Goal:</strong> Test dynamic font size adjustment using best-fit
+        binary search algorithm. Font size automatically adjusts to maximally
+        fill available space while respecting constraints.
+      </p>
+      <ul>
+        <li>
+          <strong>Scaled Text (Left):</strong> Text scales as texture - pixels
+          stretch/distort
+        </li>
+        <li>
+          <strong>Dynamic Font Size (Right):</strong> Smart best-fit text
+          adjustment:
+        </li>
+        <ul style="margin-left: 20px; margin-top: 5px">
+          <li>
+            <strong>Width-only:</strong> Adjusts word wrap width, font size
+            stays same
+          </li>
+          <li>
+            <strong>Height-only:</strong> Binary search finds largest font size
+            that fits height
+          </li>
+          <li>
+            <strong>Diagonal (both):</strong> Binary search finds best-fit font
+            size for width AND height constraints, with word wrap adjustment
+          </li>
+        </ul>
+      </ul>
+      <p>
+        <strong>Test Steps:</strong><br />
+        1. Drag horizontal edge handles (middle-left/right) → Width-only scaling
+        (word wrap adjusts)<br />
+        2. Drag vertical edge handles (top/bottom-center) → Height-only scaling
+        (best-fit font size)<br />
+        3. Drag corner handles → Diagonal scaling (best-fit font size + word
+        wrap)<br />
+        4. Check status display for scaling type, font size, and fit metrics<br />
+        5. Try with lockAspectRatio enabled/disabled
       </p>
     </div>
 
-    <!-- Theme Switcher -->
-    <div style="margin-bottom: 20px">
-      <h3>
-        🎨 Color Themes
-        <span id="status" style="font-size: 12px; color: #666"
-          >(Loading...)</span
-        >
-      </h3>
-      <div style="display: flex; gap: 10px; flex-wrap: wrap" id="theme-buttons">
-        <button
-          onclick="switchTheme('default')"
-          class="theme-btn"
-          data-color="0x6366f1"
-          disabled
-        >
-          Indigo (Default)
-        </button>
-        <button
-          onclick="switchTheme('red')"
-          class="theme-btn"
-          data-color="0xff6b6b"
-          disabled
-        >
-          Red
-        </button>
-        <button
-          onclick="switchTheme('blue')"
-          class="theme-btn"
-          data-color="0x45b7d1"
-          disabled
-        >
-          Blue
-        </button>
-        <button
-          onclick="switchTheme('teal')"
-          class="theme-btn"
-          data-color="0x4ecdc4"
-          disabled
-        >
-          Teal
-        </button>
-        <button
-          onclick="switchTheme('green')"
-          class="theme-btn"
-          data-color="0x2ecc71"
-          disabled
-        >
-          Green
-        </button>
-        <button
-          onclick="switchTheme('purple')"
-          class="theme-btn"
-          data-color="0x6c5ce7"
-          disabled
-        >
-          Purple
-        </button>
-        <button
-          onclick="switchTheme('orange')"
-          class="theme-btn"
-          data-color="0xf0932b"
-          disabled
-        >
-          Orange
-        </button>
-        <button
-          onclick="switchTheme('pink')"
-          class="theme-btn"
-          data-color="0xeb4d4b"
-          disabled
-        >
-          Pink
-        </button>
-        <button
-          onclick="switchTheme('yellow')"
-          class="theme-btn"
-          data-color="0xf9ca24"
-          disabled
-        >
-          Yellow
-        </button>
-        <button
-          onclick="switchTheme('cyan')"
-          class="theme-btn"
-          data-color="0x44aaff"
-          disabled
-        >
-          Cyan
-        </button>
+    <div class="comparison-section">
+      <div class="comparison-box scaled">
+        <h4>🟠 Scaled Text (Current Behavior)</h4>
+        <p style="font-size: 12px; color: #666; margin: 5px 0">
+          Text scales as texture - pixels stretch
+        </p>
+      </div>
+      <div class="comparison-box dynamic">
+        <h4>🟢 Dynamic Font Size (Best-Fit Algorithm)</h4>
+        <p style="font-size: 12px; color: #666; margin: 5px 0">
+          Font size adjusts - text stays crisp and fills space optimally
+        </p>
       </div>
     </div>
 
-    <!-- Nested Selection Controls -->
     <div class="controls-section">
-      <h3>🎯 Nested Selection Controls</h3>
+      <h3>⚙️ Transformer Controls</h3>
       <div class="controls-grid">
         <div class="control-group">
-          <label>Programmatic Focus:</label>
-          <button onclick="focusElement(0)" class="preset-btn">
-            Focus Circle
-          </button>
-          <button onclick="focusElement(1)" class="preset-btn">
-            Focus Star
-          </button>
-          <button onclick="focusElement(2)" class="preset-btn">
-            Focus Rectangle
-          </button>
-          <button onclick="focusElement(3)" class="preset-btn">
-            Focus Triangle
-          </button>
-        </div>
-
-        <div class="control-group">
-          <label>Navigation:</label>
-          <button onclick="cycleNext()" class="preset-btn">Cycle Next</button>
-          <button onclick="clearFocus()" class="preset-btn">Clear Focus</button>
-        </div>
-
-        <div class="control-group">
-          <label>Settings:</label>
-          <button
-            onclick="toggleNestedSelection()"
-            class="toggle-btn"
-            id="nested-enabled"
-          >
-            Enabled
-          </button>
-          <button
-            onclick="toggleShowNonFocused()"
-            class="toggle-btn"
-            id="show-non-focused"
-          >
-            Hide Others
-          </button>
-        </div>
-
-        <div class="control-group">
-          <label>Current Status:</label>
-          <div
-            id="focus-status"
-            style="
-              padding: 8px;
-              background: #f8f9fa;
-              border-radius: 4px;
-              font-size: 12px;
-            "
-          >
-            Loading...
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="controls-section">
-      <h3>📏 Handle Size Examples</h3>
-      <div class="controls-grid">
-        <div class="control-group">
-          <label>Size Presets:</label>
-          <button onclick="applySizePreset('small')" class="preset-btn">
-            Small (Default)
-          </button>
-          <button onclick="applySizePreset('medium')" class="preset-btn">
-            Medium (150%)
-          </button>
-          <button onclick="applySizePreset('large')" class="preset-btn">
-            Large (200%)
-          </button>
-          <button onclick="applySizePreset('xlarge')" class="preset-btn">
-            Extra Large (300%)
-          </button>
-        </div>
-
-        <div class="control-group">
-          <label>Custom Handle Radius:</label>
-          <input
-            type="range"
-            min="7"
-            max="50"
-            step="1"
-            value="7"
-            oninput="updateHandleRadius(this.value)"
-            id="handle-radius"
-          />
-          <span id="radius-value">7px</span>
-        </div>
-
-        <div class="control-group">
-          <label>Outline Thickness:</label>
-          <input
-            type="range"
-            min="1"
-            max="15"
-            step="0.5"
-            value="2.5"
-            oninput="updateOutlineThickness(this.value)"
-            id="outline-thickness"
-          />
-          <span id="outline-value">2.5px</span>
-        </div>
-
-        <div class="control-group">
-          <label>Glow Intensity:</label>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.05"
-            value="0.15"
-            oninput="updateGlowIntensity(this.value)"
-            id="glow-intensity"
-          />
-          <span id="glow-value">0.15</span>
-        </div>
-
-        <div class="control-group">
-          <label>Wireframe Thickness:</label>
-          <input
-            type="range"
-            min="1"
-            max="15"
-            step="0.5"
-            value="2"
-            oninput="updateWireframeThickness(this.value)"
-            id="wireframe-thickness"
-          />
-          <span id="wireframe-value">2px</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Rotator Anchor Controls -->
-    <div class="controls-section">
-      <h3>🎯 Rotator Anchor Configuration</h3>
-      <div class="controls-grid">
-        <!-- Enable/Disable -->
-        <div class="control-group">
-          <label>Enabled:</label>
-          <button
-            onclick="toggleRotatorAnchor()"
-            class="toggle-btn"
-            id="anchor-enabled"
-          >
+          <label>Lock Aspect Ratio:</label>
+          <button onclick="toggleLockAspectRatio()" id="lock-btn">
             Enabled
           </button>
         </div>
 
-        <!-- Style Selection -->
         <div class="control-group">
-          <label>Style:</label>
+          <label>Dynamic Font Size:</label>
           <button
-            onclick="setAnchorStyle('solid')"
-            class="style-btn active"
-            data-style="solid"
+            onclick="toggleDynamicFontSize()"
+            id="dynamic-btn"
+            class="active"
           >
-            Solid
+            Enabled
           </button>
-          <button
-            onclick="setAnchorStyle('dashed')"
-            class="style-btn"
-            data-style="dashed"
-          >
-            Dashed
-          </button>
-          <button
-            onclick="setAnchorStyle('dotted')"
-            class="style-btn"
-            data-style="dotted"
-          >
-            Dotted
-          </button>
-        </div>
-
-        <!-- Position Controls -->
-        <div class="control-group">
-          <label>Start Position:</label>
-          <input
-            type="range"
-            min="0"
-            max="1"
-            step="0.05"
-            value="0.45"
-            oninput="updateAnchorPosition(this.value)"
-            id="anchor-position"
-          />
-          <span id="position-value">0.45</span>
-        </div>
-
-        <div class="control-group">
-          <label>Segment Length:</label>
-          <input
-            type="range"
-            min="0.001"
-            max="0.2"
-            step="0.001"
-            value="0.005"
-            oninput="updateAnchorLength(this.value)"
-            id="anchor-length"
-          />
-          <span id="length-value">0.005</span>
-        </div>
-
-        <!-- Thickness Control -->
-        <div class="control-group">
-          <label>Thickness:</label>
-          <input
-            type="range"
-            min="1"
-            max="10"
-            step="0.5"
-            value="2"
-            oninput="updateAnchorThickness(this.value)"
-            id="anchor-thickness"
-          />
-          <span id="thickness-value">2</span>
-        </div>
-
-        <!-- Pattern Controls -->
-        <div
-          class="control-group"
-          id="dash-pattern-controls"
-          style="display: none"
-        >
-          <label>Dash Pattern:</label>
-          <div class="pattern-controls">
-            <span>Dash: </span>
-            <input
-              type="range"
-              min="2"
-              max="20"
-              value="8"
-              oninput="updateDashPattern()"
-              id="dash-length"
-            />
-            <span id="dash-length-value">8</span>
-            <span>Gap: </span>
-            <input
-              type="range"
-              min="2"
-              max="20"
-              value="4"
-              oninput="updateDashPattern()"
-              id="gap-length"
-            />
-            <span id="gap-length-value">4</span>
+          <div class="info" id="dynamic-info">
+            ✅ Best-fit algorithm: Font size adjusts to fill available space
+            perfectly
           </div>
         </div>
 
-        <div
-          class="control-group"
-          id="dot-pattern-controls"
-          style="display: none"
-        >
-          <label>Dot Pattern:</label>
-          <div class="pattern-controls">
-            <span>Size: </span>
-            <input
-              type="range"
-              min="1"
-              max="8"
-              value="2"
-              oninput="updateDotPattern()"
-              id="dot-size"
-            />
-            <span id="dot-size-value">2</span>
-            <span>Gap: </span>
-            <input
-              type="range"
-              min="2"
-              max="15"
-              value="4"
-              oninput="updateDotPattern()"
-              id="dot-gap"
-            />
-            <span id="dot-gap-value">4</span>
-          </div>
-        </div>
-
-        <!-- Preset Buttons -->
         <div class="control-group">
-          <label>Presets:</label>
-          <button onclick="applyAnchorPreset('default')" class="preset-btn">
-            Default
-          </button>
-          <button onclick="applyAnchorPreset('long')" class="preset-btn">
-            Long Line
-          </button>
-          <button onclick="applyAnchorPreset('short')" class="preset-btn">
-            Short Line
-          </button>
-          <button onclick="applyAnchorPreset('close')" class="preset-btn">
-            Close to Box
-          </button>
-          <button onclick="applyAnchorPreset('far')" class="preset-btn">
-            Far from Box
-          </button>
+          <label>Actions:</label>
+          <button onclick="resetLayout()">Reset Layout</button>
+          <button onclick="resetScales()">Reset Scales</button>
         </div>
       </div>
+    </div>
+
+    <div class="controls-section">
+      <h3>📊 Status Display</h3>
+      <div class="status-display" id="status-display">Loading...</div>
     </div>
 
     <canvas id="pen-canvas"></canvas>
 
-    <!-- CodePen-style imports -->
+    <!-- PIXI.js imports -->
     <script src="https://pixijs.download/v7.2.4/pixi.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@pixi/graphics-extras@7.1.4/dist/graphics-extras.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@pixi-essentials/object-pool@1.0.1/dist/pixi-object-pool.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@pixi-essentials/bounds@3.0.0/dist/bounds.js"></script>
-
-    <!-- Your local transformer package -->
-    <!-- <script src="packages/transformer/dist/transformer.js"></script> -->
-
-    <!-- Use published version with Canva-style individual borders -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/pixi-essentials-transformer-extended@1.0.11-alpha.2/dist/transformer.js"></script> -->
     <script src="./packages/transformer/dist/transformer.js"></script>
 
     <script>
       const app = new PIXI.Application({
         width: 1024,
-        height: 1024,
+        height: 768,
         autoDensity: true,
         resolution: window.devicePixelRatio || 1,
         view: document.getElementById("pen-canvas"),
-        backgroundColor: 0x000,
+        backgroundColor: 0xffffff,
         antialias: true,
       });
 
       app.stage.interactive = true;
       app.stage.eventMode = "static";
 
-      // Create multiple shapes to demonstrate nested selection
-      const circle = app.stage.addChild(new PIXI.Graphics());
-      circle.beginFill(0x4ade80).drawCircle(0, 0, 80).endFill(); // Green circle
-      circle.pivot.set(40, 40);
-      circle.position.set(200, 200);
-
-      // Overlap test: place a square behind the star at the same position
-      const rectangle = app.stage.addChild(new PIXI.Graphics());
-      rectangle.beginFill(0x334155).drawRect(-60, -40, 120, 80).endFill(); // Slate square (behind)
-      rectangle.position.set(450, 220);
-      rectangle.pivot.set(0, 0);
-
-      const star = app.stage.addChild(new PIXI.Graphics());
-      star.beginFill(0xf59e0b).drawStar(0, 0, 5, 60).endFill(); // Orange star (on top)
-      star.position.set(450, 220);
-      star.pivot.set(30, 30);
-
-      const triangle = app.stage.addChild(new PIXI.Graphics());
-      triangle
-        .beginFill(0x8b5cf6)
-        .drawPolygon([
-          new PIXI.Point(0, -50),
-          new PIXI.Point(-50, 50),
-          new PIXI.Point(50, 50),
-        ])
-        .endFill(); // Purple triangle
-      triangle.position.set(800, 200);
-      triangle.pivot.set(0, 0);
-
-      // Add labels to each shape
-      const circleLabel = circle.addChild(
-        new PIXI.Text("Circle", {
-          fontSize: 16,
-          fill: 0xffffff,
-          fontWeight: "bold",
-        })
-      );
-      circleLabel.anchor.set(0.5);
-      circleLabel.y = -10;
-
-      const starLabel = star.addChild(
-        new PIXI.Text("Star", {
-          fontSize: 16,
-          fill: 0xffffff,
-          fontWeight: "bold",
-        })
-      );
-      starLabel.anchor.set(0.5);
-      starLabel.y = -10;
-
-      const rectLabel = rectangle.addChild(
-        new PIXI.Text("Rectangle", {
-          fontSize: 16,
-          fill: 0xffffff,
-          fontWeight: "bold",
-        })
-      );
-      rectLabel.anchor.set(0.5);
-      rectLabel.y = 50;
-
-      const triangleLabel = triangle.addChild(
-        new PIXI.Text("Triangle", {
-          fontSize: 16,
-          fill: 0xffffff,
-          fontWeight: "bold",
-        })
-      );
-      triangleLabel.anchor.set(0.5);
-      triangleLabel.y = -10;
-
-      // Global transformer reference
       let transformer = null;
+      let scaledTextElement = null;
+      let dynamicTextElement = null;
+      let starElement = null;
 
-      // Initialize SVG textures for rotator handles
+      // Store initial values
+      const initialFontSize = 48;
+      const initialPositions = {
+        scaledText: { x: 250, y: 300 },
+        dynamicText: { x: 750, y: 300 },
+        star: { x: 500, y: 500 },
+      };
+      const initialScales = {
+        scaledText: { x: 1, y: 1 },
+        dynamicText: { x: 1, y: 1 },
+        star: { x: 1, y: 1 },
+      };
+
+      // Dynamic font size state
+      let dynamicFontSizeEnabled = true;
+      let baseFontSize = initialFontSize;
+      let baseWidth = null;
+      let baseHeight = null;
+      let baseWordWrapWidth = null;
+      let lastTransformScale = { x: 1, y: 1 };
+      let hasInverseScaling = false;
+      let scalingType = "none";
+
+      // Initialize SVG textures
       if (PIXI.TransformerHandle && PIXI.TransformerHandle.loadTextures) {
         PIXI.TransformerHandle.loadTextures()
           .then(() => {
             console.log("SVG textures loaded successfully!");
-            createTransformer();
+            createElements();
           })
           .catch((error) => {
             console.warn("SVG texture loading failed, using fallback:", error);
-            createTransformer();
+            createElements();
           });
       } else {
-        console.warn(
-          "TransformerHandle not found, creating transformer without SVG"
+        createElements();
+      }
+
+      function createElements() {
+        // Clear existing
+        if (scaledTextElement) app.stage.removeChild(scaledTextElement);
+        if (dynamicTextElement) app.stage.removeChild(dynamicTextElement);
+        if (starElement) app.stage.removeChild(starElement);
+        if (transformer) app.stage.removeChild(transformer);
+
+        // Create Scaled Text
+        scaledTextElement = new PIXI.Text("Scaled Text", {
+          fontSize: initialFontSize,
+          fill: 0xff6b6b,
+          fontWeight: "bold",
+          fontFamily: "Arial",
+          stroke: 0x000000,
+          strokeThickness: 2,
+          resolution: window.devicePixelRatio || 1,
+        });
+        scaledTextElement.anchor.set(0.5);
+        scaledTextElement.position.set(
+          initialPositions.scaledText.x,
+          initialPositions.scaledText.y
         );
+        app.stage.addChild(scaledTextElement);
+
+        // Create Dynamic Text with word wrap
+        dynamicTextElement = new PIXI.Text("Dynamic Text with Word Wrap", {
+          fontSize: initialFontSize,
+          fill: 0x10b981,
+          fontWeight: "bold",
+          fontFamily: "Arial",
+          stroke: 0x000000,
+          strokeThickness: 2,
+          resolution: window.devicePixelRatio || 1,
+          wordWrap: true,
+          wordWrapWidth: 200,
+        });
+        dynamicTextElement.anchor.set(0.5);
+        dynamicTextElement.position.set(
+          initialPositions.dynamicText.x,
+          initialPositions.dynamicText.y
+        );
+        app.stage.addChild(dynamicTextElement);
+
+        // Store base dimensions
+        baseWidth = dynamicTextElement.width;
+        baseHeight = dynamicTextElement.height;
+        baseFontSize = initialFontSize;
+        baseWordWrapWidth = dynamicTextElement.style.wordWrapWidth || baseWidth;
+
+        // Create Star element
+        starElement = new PIXI.Graphics();
+        starElement.beginFill(0xf59e0b).drawStar(0, 0, 5, 60).endFill();
+        starElement.pivot.set(30, 30);
+        starElement.position.set(
+          initialPositions.star.x,
+          initialPositions.star.y
+        );
+        app.stage.addChild(starElement);
+
+        // Add labels
+        const scaledLabel = new PIXI.Text("SCALED", {
+          fontSize: 14,
+          fill: 0xff6b6b,
+          fontWeight: "bold",
+        });
+        scaledLabel.anchor.set(0.5);
+        scaledLabel.position.set(
+          initialPositions.scaledText.x,
+          initialPositions.scaledText.y - 80
+        );
+        app.stage.addChild(scaledLabel);
+
+        const dynamicLabel = new PIXI.Text("DYNAMIC (BEST-FIT)", {
+          fontSize: 14,
+          fill: 0x10b981,
+          fontWeight: "bold",
+        });
+        dynamicLabel.anchor.set(0.5);
+        dynamicLabel.position.set(
+          initialPositions.dynamicText.x,
+          initialPositions.dynamicText.y - 80
+        );
+        app.stage.addChild(dynamicLabel);
+
+        // Create transformer
         createTransformer();
+
+        // Store initial scales
+        initialScales.scaledText = {
+          x: scaledTextElement.scale.x,
+          y: scaledTextElement.scale.y,
+        };
+        initialScales.dynamicText = {
+          x: dynamicTextElement.scale.x,
+          y: dynamicTextElement.scale.y,
+        };
+        initialScales.star = {
+          x: starElement.scale.x,
+          y: starElement.scale.y,
+        };
+
+        updateStatus();
       }
 
       function createTransformer() {
+        if (transformer) {
+          app.stage.removeChild(transformer);
+        }
+
         transformer = app.stage.addChild(
           new PIXI.Transformer({
             rotateEnabled: true,
             boxRotationEnabled: true,
             transientGroupTilt: false,
-            group: [circle, rectangle, star, triangle], // Include overlapped elements; order shouldn't affect pick
+            centeredScaling: false,
+            group: [scaledTextElement, dynamicTextElement, starElement],
             stage: app.stage,
-            boundingBoxes: "all", // Must be "all" to show individual borders
-
-            // NESTED SELECTION (Canva-style) - NEW FEATURE!
-            nestedSelectionEnabled: true, // Enable click-to-focus
-            focusedElementBorderColor: 0x8b5cf6, // Purple for focused element
-            focusedElementBorderThickness: 2,
-            showNonFocusedBorders: false, // Hide non-focused borders
+            boundingBoxes: "all",
+            lockAspectRatio: true,
 
             wireframeStyle: {
               thickness: 2,
-              color: 0x8b5cf6, // Purple group border
+              color: 0x6366f1,
             },
-            // Purple handles to match
             colorTheme: {
-              primary: 0x8b5cf6,
-              secondary: 0x7c3aed,
+              primary: 0x6366f1,
+              secondary: 0x4f46e5,
               background: 0xffffff,
-              glow: 0x8b5cf6,
+              glow: 0x6366f1,
               glowIntensity: 0.15,
             },
-            // Cyan individual borders (for non-focused elements if shown)
-            individualBorderColor: 0x00d4ff, // Cyan
+            individualBorderColor: 0x00d4ff,
             individualBorderThickness: 1.5,
-            individualBorderAlpha: 1.0,
+            individualBorderAlpha: 0.8,
+            individualBorderStyle: "dotted",
+            individualBorderDashPattern: [2, 3],
           })
         );
-        console.log("Transformer created:", transformer);
-        console.log(
-          "Initial focused element index:",
-          transformer.focusedElementIndex
-        );
-        console.log("Initial focused element:", transformer.focusedElement);
 
-        // Listen to nested selection events
-        transformer.on("elementfocused", (element, index) => {
-          console.log(`🎯 Element focused at index ${index}:`, element);
-          updateFocusStatus();
-        });
-
-        transformer.on("elementfocuscleared", () => {
-          console.log("🔄 Element focus cleared");
-          updateFocusStatus();
-        });
-
-        // Update initial status
-        updateFocusStatus();
-
-        // Enable all theme buttons
-
-        // Enable all theme buttons
-        document.querySelectorAll(".theme-btn").forEach((btn) => {
-          btn.disabled = false;
-        });
-
-        // Set default button as active
-        document
-          .querySelector('[data-color="0x6366f1"]')
-          .classList.add("active");
-
-        // Update status
-        document.getElementById("status").textContent = "(Ready!)";
-        document.getElementById("status").style.color = "#2ecc71";
-      }
-
-      // Theme definitions
-      const themes = {
-        default: {
-          primary: 0x6366f1,
-          secondary: 0x4f46e5,
-          glow: 0x6366f1,
-        },
-        red: {
-          primary: 0xff6b6b,
-          secondary: 0xe74c3c,
-          glow: 0xff6b6b,
-        },
-        blue: {
-          primary: 0x45b7d1,
-          secondary: 0x3498db,
-          glow: 0x45b7d1,
-        },
-        teal: {
-          primary: 0x4ecdc4,
-          secondary: 0x26d0ce,
-          glow: 0x4ecdc4,
-        },
-        green: {
-          primary: 0x2ecc71,
-          secondary: 0x27ae60,
-          glow: 0x2ecc71,
-        },
-        purple: {
-          primary: 0x6c5ce7,
-          secondary: 0x5f3dc4,
-          glow: 0x6c5ce7,
-        },
-        orange: {
-          primary: 0xf0932b,
-          secondary: 0xe67e22,
-          glow: 0xf0932b,
-        },
-        pink: {
-          primary: 0xeb4d4b,
-          secondary: 0xc0392b,
-          glow: 0xeb4d4b,
-        },
-        yellow: {
-          primary: 0xf9ca24,
-          secondary: 0xf39c12,
-          glow: 0xf9ca24,
-        },
-        cyan: {
-          primary: 0x44aaff,
-          secondary: 0x3498db,
-          glow: 0x44aaff,
-        },
-      };
-
-      // Theme switching function
-      function safeClone(obj) {
-        try {
-          return JSON.parse(JSON.stringify(obj));
-        } catch (_) {
-          return obj;
-        }
-      }
-
-      function logTransformerState(label) {
-        if (!transformer) return;
-        const snapshot = {
-          label,
-          colorTheme: safeClone(transformer.colorTheme),
-          handleStyle: safeClone(transformer.handleStyle),
-          wireframeStyle: safeClone(transformer.wireframeStyle),
-          rotatorAnchor: safeClone(transformer.rotatorAnchor),
-        };
-        console.log("[Transformer State]", snapshot);
-      }
-
-      function switchTheme(themeName) {
-        if (!transformer) {
-          console.warn("Transformer not yet initialized. Please wait...");
-          return;
-        }
-
-        const theme = themes[themeName];
-        if (!theme) {
-          console.error(`Theme '${themeName}' not found`);
-          return;
-        }
-
-        console.groupCollapsed("[Theme] Switching ->", themeName);
-        console.log("[Theme] Requested theme:", safeClone(theme));
-        logTransformerState("before-switch");
-
-        // Update transformer colors
-        transformer.colorTheme = {
-          ...theme,
-          background: 0xffffff,
-          glowIntensity: 0.15,
-        };
-
-        logTransformerState("after-switch (immediate)");
-        requestAnimationFrame(() => {
-          logTransformerState("after-switch (next frame)");
-          console.groupEnd();
-        });
-
-        // Update button states
-        document.querySelectorAll(".theme-btn").forEach((btn) => {
-          btn.classList.remove("active");
-        });
-
-        const activeButton = document.querySelector(
-          `[data-color="0x${theme.primary.toString(16)}"]`
-        );
-        if (activeButton) {
-          activeButton.classList.add("active");
-        }
-
-        console.log(`[Theme] Switched to '${themeName}'`);
-      }
-
-      // Rotator Anchor Control Functions
-      function toggleRotatorAnchor() {
-        if (!transformer) {
-          console.warn("Transformer not yet initialized. Please wait...");
-          return;
-        }
-
-        const currentConfig = transformer.rotatorAnchor;
-        const newConfig = {
-          ...currentConfig,
-          enabled: !currentConfig.enabled,
-        };
-
-        transformer.rotatorAnchor = newConfig;
-
-        const button = document.getElementById("anchor-enabled");
-        if (newConfig.enabled) {
-          button.textContent = "Enabled";
-          button.className = "toggle-btn enabled";
-        } else {
-          button.textContent = "Disabled";
-          button.className = "toggle-btn disabled";
-        }
-
-        console.log("Rotator anchor toggled:", newConfig);
-      }
-
-      function setAnchorStyle(style) {
-        if (!transformer) {
-          console.warn("Transformer not yet initialized. Please wait...");
-          return;
-        }
-
-        const currentConfig = transformer.rotatorAnchor;
-        const newConfig = {
-          ...currentConfig,
-          style: style,
-        };
-
-        transformer.rotatorAnchor = newConfig;
-
-        // Update button states
-        document.querySelectorAll(".style-btn").forEach((btn) => {
-          btn.classList.remove("active");
-        });
-        document
-          .querySelector(`[data-style="${style}"]`)
-          .classList.add("active");
-
-        // Show/hide pattern controls
-        document.getElementById("dash-pattern-controls").style.display =
-          style === "dashed" ? "block" : "none";
-        document.getElementById("dot-pattern-controls").style.display =
-          style === "dotted" ? "block" : "none";
-
-        console.log("Anchor style changed to:", style);
-      }
-
-      function updateAnchorPosition(value) {
-        if (!transformer) {
-          console.warn("Transformer not yet initialized. Please wait...");
-          return;
-        }
-
-        const currentConfig = transformer.rotatorAnchor;
-        const newConfig = {
-          ...currentConfig,
-          startPosition: parseFloat(value),
-        };
-
-        transformer.rotatorAnchor = newConfig;
-        document.getElementById("position-value").textContent = value;
-
-        console.log("Anchor position updated:", value);
-      }
-
-      function updateAnchorLength(value) {
-        if (!transformer) {
-          console.warn("Transformer not yet initialized. Please wait...");
-          return;
-        }
-
-        const currentConfig = transformer.rotatorAnchor;
-        const newConfig = {
-          ...currentConfig,
-          segmentLength: parseFloat(value),
-        };
-
-        transformer.rotatorAnchor = newConfig;
-        document.getElementById("length-value").textContent = value;
-
-        console.log("Anchor length updated:", value);
-      }
-
-      function updateAnchorThickness(value) {
-        if (!transformer) {
-          console.warn("Transformer not yet initialized. Please wait...");
-          return;
-        }
-
-        const currentConfig = transformer.rotatorAnchor;
-        const newConfig = {
-          ...currentConfig,
-          thickness: parseFloat(value),
-        };
-
-        transformer.rotatorAnchor = newConfig;
-        document.getElementById("thickness-value").textContent = value;
-
-        console.log("Anchor thickness updated:", value);
-      }
-
-      function updateDashPattern() {
-        if (!transformer) {
-          console.warn("Transformer not yet initialized. Please wait...");
-          return;
-        }
-
-        const dashLength = parseFloat(
-          document.getElementById("dash-length").value
-        );
-        const gapLength = parseFloat(
-          document.getElementById("gap-length").value
-        );
-
-        document.getElementById("dash-length-value").textContent = dashLength;
-        document.getElementById("gap-length-value").textContent = gapLength;
-
-        const currentConfig = transformer.rotatorAnchor;
-        const newConfig = {
-          ...currentConfig,
-          dashPattern: [dashLength, gapLength],
-        };
-
-        transformer.rotatorAnchor = newConfig;
-
-        console.log("Dash pattern updated:", [dashLength, gapLength]);
-      }
-
-      function updateDotPattern() {
-        if (!transformer) {
-          console.warn("Transformer not yet initialized. Please wait...");
-          return;
-        }
-
-        const dotSize = parseFloat(document.getElementById("dot-size").value);
-        const dotGap = parseFloat(document.getElementById("dot-gap").value);
-
-        document.getElementById("dot-size-value").textContent = dotSize;
-        document.getElementById("dot-gap-value").textContent = dotGap;
-
-        const currentConfig = transformer.rotatorAnchor;
-        const newConfig = {
-          ...currentConfig,
-          dotPattern: [dotSize, dotGap],
-        };
-
-        transformer.rotatorAnchor = newConfig;
-
-        console.log("Dot pattern updated:", [dotSize, dotGap]);
-      }
-
-      function applyAnchorPreset(preset) {
-        if (!transformer) {
-          console.warn("Transformer not yet initialized. Please wait...");
-          return;
-        }
-
-        let newConfig = { ...transformer.rotatorAnchor };
-
-        switch (preset) {
-          case "default":
-            newConfig = {
-              enabled: true,
-              startPosition: 0.45,
-              segmentLength: 0.005,
-              thickness: 2,
-              style: "solid",
+        // Listen to transform events
+        transformer.on("transformchange", () => {
+          if (hasInverseScaling && dynamicTextElement) {
+            const currentScale = dynamicTextElement.scale;
+            lastTransformScale = {
+              x: 1 / currentScale.x,
+              y: 1 / currentScale.y,
             };
-            break;
-          case "long":
-            newConfig = {
-              ...newConfig,
-              startPosition: 0.3,
-              segmentLength: 0.08,
-              style: "solid",
-            };
-            break;
-          case "short":
-            newConfig = {
-              ...newConfig,
-              startPosition: 0.4,
-              segmentLength: 0.002,
-              style: "solid",
-            };
-            break;
-          case "close":
-            newConfig = {
-              ...newConfig,
-              startPosition: 0.2,
-              segmentLength: 0.01,
-              style: "solid",
-            };
-            break;
-          case "far":
-            newConfig = {
-              ...newConfig,
-              startPosition: 0.6,
-              segmentLength: 0.01,
-              style: "solid",
-            };
-            break;
-        }
-
-        transformer.rotatorAnchor = newConfig;
-
-        // Update UI controls
-        document.getElementById("anchor-position").value =
-          newConfig.startPosition;
-        document.getElementById("position-value").textContent =
-          newConfig.startPosition;
-        document.getElementById("anchor-length").value =
-          newConfig.segmentLength;
-        document.getElementById("length-value").textContent =
-          newConfig.segmentLength;
-        document.getElementById("anchor-thickness").value = newConfig.thickness;
-        document.getElementById("thickness-value").textContent =
-          newConfig.thickness;
-
-        // Update style buttons
-        setAnchorStyle(newConfig.style);
-
-        console.log(`Applied ${preset} preset:`, newConfig);
-      }
-
-      // Handle Size Control Functions
-      function applySizePreset(preset) {
-        if (!transformer) {
-          console.warn("Transformer not yet initialized. Please wait...");
-          return;
-        }
-
-        let handleStyle, wireframeStyle, rotatorAnchor;
-
-        switch (preset) {
-          case "small":
-            handleStyle = {
-              radius: 7,
-              outlineThickness: 2.5,
-              glowIntensity: 0.15,
-            };
-            wireframeStyle = {
-              thickness: 2,
-            };
-            rotatorAnchor = {
-              thickness: 2,
-              segmentLength: 0.005,
-            };
-            break;
-          case "medium":
-            handleStyle = {
-              radius: 10,
-              outlineThickness: 3.5,
-              glowIntensity: 0.25,
-            };
-            wireframeStyle = {
-              thickness: 3,
-            };
-            rotatorAnchor = {
-              thickness: 3,
-              segmentLength: 0.008,
-            };
-            break;
-          case "large":
-            handleStyle = {
-              radius: 14,
-              outlineThickness: 5,
-              glowIntensity: 0.35,
-            };
-            wireframeStyle = {
-              thickness: 4,
-            };
-            rotatorAnchor = {
-              thickness: 4,
-              segmentLength: 0.012,
-            };
-            break;
-          case "xlarge":
-            handleStyle = {
-              radius: 21,
-              outlineThickness: 7.5,
-              glowIntensity: 0.5,
-            };
-            wireframeStyle = {
-              thickness: 6,
-            };
-            rotatorAnchor = {
-              thickness: 6,
-              segmentLength: 0.015,
-            };
-            break;
-        }
-
-        // Apply the new styles
-        transformer.handleStyle = {
-          ...transformer.handleStyle,
-          ...handleStyle,
-        };
-        transformer.wireframeStyle = {
-          ...transformer.wireframeStyle,
-          ...wireframeStyle,
-        };
-        transformer.rotatorAnchor = {
-          ...transformer.rotatorAnchor,
-          ...rotatorAnchor,
-        };
-
-        // Update UI controls
-        document.getElementById("handle-radius").value = handleStyle.radius;
-        document.getElementById(
-          "radius-value"
-        ).textContent = `${handleStyle.radius}px`;
-        document.getElementById("outline-thickness").value =
-          handleStyle.outlineThickness;
-        document.getElementById(
-          "outline-value"
-        ).textContent = `${handleStyle.outlineThickness}px`;
-        document.getElementById("glow-intensity").value =
-          handleStyle.glowIntensity;
-        document.getElementById("glow-value").textContent =
-          handleStyle.glowIntensity;
-        document.getElementById("wireframe-thickness").value =
-          wireframeStyle.thickness;
-        document.getElementById(
-          "wireframe-value"
-        ).textContent = `${wireframeStyle.thickness}px`;
-        document.getElementById("anchor-thickness").value =
-          rotatorAnchor.thickness;
-        document.getElementById(
-          "thickness-value"
-        ).textContent = `${rotatorAnchor.thickness}px`;
-        document.getElementById("anchor-length").value =
-          rotatorAnchor.segmentLength;
-        document.getElementById("length-value").textContent =
-          rotatorAnchor.segmentLength;
-
-        console.log(`Applied ${preset} size preset:`, {
-          handleStyle,
-          wireframeStyle,
-          rotatorAnchor,
-        });
-      }
-
-      function updateHandleRadius(value) {
-        if (!transformer) {
-          console.warn("Transformer not yet initialized. Please wait...");
-          return;
-        }
-
-        const radius = parseFloat(value);
-        transformer.handleStyle = {
-          ...transformer.handleStyle,
-          radius: radius,
-        };
-
-        document.getElementById("radius-value").textContent = `${radius}px`;
-        console.log("Handle radius updated:", radius);
-      }
-
-      function updateOutlineThickness(value) {
-        if (!transformer) {
-          console.warn("Transformer not yet initialized. Please wait...");
-          return;
-        }
-
-        const thickness = parseFloat(value);
-        transformer.handleStyle = {
-          ...transformer.handleStyle,
-          outlineThickness: thickness,
-        };
-
-        document.getElementById("outline-value").textContent = `${thickness}px`;
-        console.log("Outline thickness updated:", thickness);
-      }
-
-      function updateGlowIntensity(value) {
-        if (!transformer) {
-          console.warn("Transformer not yet initialized. Please wait...");
-          return;
-        }
-
-        const intensity = parseFloat(value);
-        transformer.handleStyle = {
-          ...transformer.handleStyle,
-          glowIntensity: intensity,
-        };
-
-        document.getElementById("glow-value").textContent = intensity;
-        console.log("Glow intensity updated:", intensity);
-      }
-
-      function updateWireframeThickness(value) {
-        if (!transformer) {
-          console.warn("Transformer not yet initialized. Please wait...");
-          return;
-        }
-
-        const thickness = parseFloat(value);
-        transformer.wireframeStyle = {
-          ...transformer.wireframeStyle,
-          thickness: thickness,
-        };
-
-        document.getElementById(
-          "wireframe-value"
-        ).textContent = `${thickness}px`;
-        console.log("Wireframe thickness updated:", thickness);
-      }
-
-      // Nested Selection Control Functions
-      function focusElement(index) {
-        if (!transformer) {
-          console.warn("Transformer not yet initialized. Please wait...");
-          return;
-        }
-
-        const elementNames = ["Circle", "Star", "Rectangle", "Triangle"];
-        transformer.focusedElementIndex = index;
-        console.log(
-          `🎯 Programmatically focused: ${elementNames[index]} (index ${index})`
-        );
-        updateFocusStatus();
-      }
-
-      function cycleNext() {
-        if (!transformer) {
-          console.warn("Transformer not yet initialized. Please wait...");
-          return;
-        }
-
-        transformer.focusNextElement();
-        console.log("🔄 Cycled to next element");
-        updateFocusStatus();
-      }
-
-      function clearFocus() {
-        if (!transformer) {
-          console.warn("Transformer not yet initialized. Please wait...");
-          return;
-        }
-
-        transformer.clearElementFocus();
-        console.log("🔄 Cleared element focus");
-        updateFocusStatus();
-      }
-
-      function toggleNestedSelection() {
-        if (!transformer) {
-          console.warn("Transformer not yet initialized. Please wait...");
-          return;
-        }
-
-        transformer.nestedSelectionEnabled =
-          !transformer.nestedSelectionEnabled;
-        transformer.lazyDirty = true;
-
-        // Update element interactions when toggling nested selection
-        transformer.group.forEach((element, index) => {
-          if (
-            transformer.nestedSelectionEnabled &&
-            transformer.group.length > 1
-          ) {
-            element.interactive = true;
-            element.eventMode = "static";
           } else {
-            element.interactive = false;
-            element.eventMode = "none";
+            lastTransformScale = {
+              x: dynamicTextElement.scale.x,
+              y: dynamicTextElement.scale.y,
+            };
           }
+          updateDynamicTextFontSize();
+          updateStatus();
         });
 
-        const button = document.getElementById("nested-enabled");
-        if (transformer.nestedSelectionEnabled) {
+        transformer.on("transformcommit", () => {
+          commitDynamicTextFontSize();
+          updateStatus();
+          console.log("Transform committed");
+        });
+
+        updateLockButton();
+        updateDynamicButton();
+      }
+
+      /**
+       * Binary search algorithm to find the best-fit font size
+       */
+      function findBestFitFontSize(
+        textElement,
+        initialFontSize,
+        wordWrapWidth,
+        targetWidth,
+        targetHeight,
+        precision = 0.1
+      ) {
+        let minFontSize = 6;
+        let maxFontSize = initialFontSize * 10;
+        let bestFontSize = initialFontSize;
+
+        while (maxFontSize - minFontSize > precision) {
+          const testFontSize = (minFontSize + maxFontSize) / 2;
+
+          textElement.style.fontSize = testFontSize;
+          if (wordWrapWidth !== null) {
+            textElement.style.wordWrapWidth = wordWrapWidth;
+          }
+          textElement.dirty = true;
+          textElement.updateText(true);
+
+          const fitsWidth =
+            targetWidth === null || textElement.width <= targetWidth;
+          const fitsHeight =
+            targetHeight === null || textElement.height <= targetHeight;
+
+          if (fitsWidth && fitsHeight) {
+            bestFontSize = testFontSize;
+            minFontSize = testFontSize;
+          } else {
+            maxFontSize = testFontSize;
+          }
+        }
+
+        return bestFontSize;
+      }
+
+      /**
+       * Calculate and update dynamic text based on scaling type with best-fit algorithm
+       */
+      function updateDynamicTextFontSize() {
+        if (!dynamicTextElement || !dynamicFontSizeEnabled) return;
+
+        const scale = dynamicTextElement.scale;
+        const threshold = 0.01;
+
+        const isWidthOnly =
+          Math.abs(scale.y - 1) < threshold &&
+          Math.abs(scale.x - 1) > threshold;
+        const isHeightOnly =
+          Math.abs(scale.x - 1) < threshold &&
+          Math.abs(scale.y - 1) > threshold;
+        const isDiagonal =
+          Math.abs(scale.x - 1) > threshold &&
+          Math.abs(scale.y - 1) > threshold;
+
+        const containerWidth = baseWidth * scale.x;
+        const containerHeight = baseHeight * scale.y;
+        const padding = 10;
+
+        if (isWidthOnly) {
+          scalingType = "width";
+          const newWordWrapWidth = Math.max(20, containerWidth - padding * 2);
+          dynamicTextElement.style.wordWrapWidth = newWordWrapWidth;
+
+          const inverseScaleX = 1 / scale.x;
+          const inverseScaleY = 1 / scale.y;
+          dynamicTextElement.scale.set(inverseScaleX, inverseScaleY);
+          hasInverseScaling = true;
+
+          console.log("Width-only scaling:", {
+            scale: { x: scale.x, y: scale.y },
+            wordWrapWidth: newWordWrapWidth,
+            fontSize: baseFontSize,
+          });
+        } else if (isHeightOnly) {
+          scalingType = "height";
+
+          const targetHeight = containerHeight - padding * 2;
+          const bestFitFontSize = findBestFitFontSize(
+            dynamicTextElement,
+            baseFontSize,
+            baseWordWrapWidth,
+            null,
+            targetHeight,
+            0.1
+          );
+
+          dynamicTextElement.style.fontSize = bestFitFontSize;
+          dynamicTextElement.style.wordWrapWidth = baseWordWrapWidth;
+
+          const inverseScaleX = 1 / scale.x;
+          const inverseScaleY = 1 / scale.y;
+          dynamicTextElement.scale.set(inverseScaleX, inverseScaleY);
+          hasInverseScaling = true;
+
+          console.log("Height-only scaling (best-fit):", {
+            scale: { x: scale.x, y: scale.y },
+            targetHeight,
+            bestFitFontSize,
+            actualHeight: dynamicTextElement.height,
+          });
+        } else if (isDiagonal) {
+          scalingType = "diagonal";
+
+          const targetWidth = containerWidth - padding * 2;
+          const targetHeight = containerHeight - padding * 2;
+
+          const bestFitFontSize = findBestFitFontSize(
+            dynamicTextElement,
+            baseFontSize,
+            targetWidth,
+            targetWidth,
+            targetHeight,
+            0.1
+          );
+
+          dynamicTextElement.style.fontSize = bestFitFontSize;
+          dynamicTextElement.style.wordWrapWidth = Math.max(20, targetWidth);
+
+          const inverseScaleX = 1 / scale.x;
+          const inverseScaleY = 1 / scale.y;
+          dynamicTextElement.scale.set(inverseScaleX, inverseScaleY);
+          hasInverseScaling = true;
+
+          console.log("Diagonal scaling (best-fit):", {
+            scale: { x: scale.x, y: scale.y },
+            targetWidth,
+            targetHeight,
+            bestFitFontSize,
+            actualWidth: dynamicTextElement.width,
+            actualHeight: dynamicTextElement.height,
+          });
+        } else {
+          scalingType = "none";
+          hasInverseScaling = false;
+        }
+
+        dynamicTextElement.dirty = true;
+        dynamicTextElement.updateText();
+      }
+
+      /**
+       * Commit changes based on scaling type with best-fit preservation
+       */
+      function commitDynamicTextFontSize() {
+        if (!dynamicTextElement || !dynamicFontSizeEnabled) return;
+
+        const originalScale = lastTransformScale;
+        const threshold = 0.01;
+        const padding = 10;
+
+        const isWidthOnly =
+          Math.abs(originalScale.y - 1) < threshold &&
+          Math.abs(originalScale.x - 1) > threshold;
+        const isHeightOnly =
+          Math.abs(originalScale.x - 1) < threshold &&
+          Math.abs(originalScale.y - 1) > threshold;
+        const isDiagonal =
+          Math.abs(originalScale.x - 1) > threshold &&
+          Math.abs(originalScale.y - 1) > threshold;
+
+        if (isWidthOnly) {
+          const containerWidth = baseWidth * originalScale.x;
+          const newWordWrapWidth = Math.max(20, containerWidth - padding * 2);
+          baseWordWrapWidth = newWordWrapWidth;
+          dynamicTextElement.style.wordWrapWidth = baseWordWrapWidth;
+          baseWidth = containerWidth;
+
+          dynamicTextElement.scale.set(1, 1);
+          hasInverseScaling = false;
+
+          console.log("Width-only committed:", {
+            fontSize: baseFontSize,
+            wordWrapWidth: baseWordWrapWidth,
+            containerWidth: baseWidth,
+          });
+        } else if (isHeightOnly) {
+          const containerHeight = baseHeight * originalScale.y;
+          const targetHeight = containerHeight - padding * 2;
+
+          const committedFontSize = dynamicTextElement.style.fontSize;
+          baseFontSize = committedFontSize;
+          baseHeight = containerHeight;
+
+          dynamicTextElement.scale.set(1, 1);
+          hasInverseScaling = false;
+
+          console.log("Height-only committed (best-fit):", {
+            fontSize: baseFontSize,
+            containerHeight: baseHeight,
+            targetHeight,
+          });
+        } else if (isDiagonal) {
+          const containerWidth = baseWidth * originalScale.x;
+          const containerHeight = baseHeight * originalScale.y;
+          const targetWidth = containerWidth - padding * 2;
+          const targetHeight = containerHeight - padding * 2;
+
+          const committedFontSize = dynamicTextElement.style.fontSize;
+          const committedWordWrapWidth = dynamicTextElement.style.wordWrapWidth;
+
+          baseFontSize = committedFontSize;
+          baseWordWrapWidth = Math.max(20, committedWordWrapWidth);
+          baseWidth = containerWidth;
+          baseHeight = containerHeight;
+
+          dynamicTextElement.style.fontSize = baseFontSize;
+          dynamicTextElement.style.wordWrapWidth = baseWordWrapWidth;
+
+          dynamicTextElement.scale.set(1, 1);
+          hasInverseScaling = false;
+
+          console.log("Diagonal committed (best-fit):", {
+            fontSize: baseFontSize,
+            wordWrapWidth: baseWordWrapWidth,
+            containerWidth: baseWidth,
+            containerHeight: baseHeight,
+            targetWidth,
+            targetHeight,
+          });
+        } else {
+          dynamicTextElement.scale.set(1, 1);
+          hasInverseScaling = false;
+        }
+
+        dynamicTextElement.dirty = true;
+        dynamicTextElement.updateText();
+
+        lastTransformScale = { x: 1, y: 1 };
+        scalingType = "none";
+      }
+
+      function toggleLockAspectRatio() {
+        if (!transformer) return;
+        transformer.lockAspectRatio = !transformer.lockAspectRatio;
+        updateLockButton();
+        updateStatus();
+      }
+
+      function toggleDynamicFontSize() {
+        dynamicFontSizeEnabled = !dynamicFontSizeEnabled;
+        updateDynamicButton();
+
+        if (!dynamicFontSizeEnabled) {
+          dynamicTextElement.style.fontSize = baseFontSize;
+          dynamicTextElement.scale.set(1, 1);
+          dynamicTextElement.dirty = true;
+          dynamicTextElement.updateText();
+        }
+
+        updateStatus();
+      }
+
+      function updateLockButton() {
+        const button = document.getElementById("lock-btn");
+        if (transformer.lockAspectRatio) {
           button.textContent = "Enabled";
-          button.className = "toggle-btn enabled";
+          button.className = "active";
         } else {
           button.textContent = "Disabled";
-          button.className = "toggle-btn disabled";
+          button.className = "";
         }
-
-        console.log(
-          "🔄 Nested selection toggled:",
-          transformer.nestedSelectionEnabled
-        );
-        updateFocusStatus();
       }
 
-      function toggleShowNonFocused() {
-        if (!transformer) {
-          console.warn("Transformer not yet initialized. Please wait...");
+      function updateDynamicButton() {
+        const button = document.getElementById("dynamic-btn");
+        const info = document.getElementById("dynamic-info");
+        if (dynamicFontSizeEnabled) {
+          button.textContent = "Enabled";
+          button.className = "active";
+          info.textContent =
+            "✅ Best-fit algorithm: Font size adjusts to fill available space perfectly";
+          info.style.background = "#d1fae5";
+          info.style.borderColor = "#10b981";
+          info.style.color = "#065f46";
+        } else {
+          button.textContent = "Disabled";
+          button.className = "";
+          info.textContent =
+            "❌ Font size stays fixed - text scales as texture";
+          info.style.background = "#fee2e2";
+          info.style.borderColor = "#ef4444";
+          info.style.color = "#991b1b";
+        }
+      }
+
+      /**
+       * Calculate fit quality percentage
+       */
+      function calculateFitQuality() {
+        if (!dynamicTextElement || !dynamicFontSizeEnabled) return 0;
+
+        const containerWidth =
+          baseWidth * (hasInverseScaling ? lastTransformScale.x : 1);
+        const containerHeight =
+          baseHeight * (hasInverseScaling ? lastTransformScale.y : 1);
+        const padding = 10;
+
+        const targetWidth = containerWidth - padding * 2;
+        const targetHeight = containerHeight - padding * 2;
+
+        const actualWidth = dynamicTextElement.width;
+        const actualHeight = dynamicTextElement.height;
+
+        const widthUtilization = Math.min(
+          100,
+          (actualWidth / targetWidth) * 100
+        );
+        const heightUtilization = Math.min(
+          100,
+          (actualHeight / targetHeight) * 100
+        );
+
+        const fitQuality = (widthUtilization + heightUtilization) / 2;
+        return fitQuality.toFixed(1);
+      }
+
+      function updateStatus() {
+        if (
+          !transformer ||
+          !scaledTextElement ||
+          !dynamicTextElement ||
+          !starElement
+        )
           return;
-        }
 
-        transformer.showNonFocusedBorders = !transformer.showNonFocusedBorders;
-        transformer.lazyDirty = true;
+        const scaledScale = scaledTextElement.scale;
+        const dynamicScale = dynamicTextElement.scale;
+        const starScale = starElement.scale;
 
-        const button = document.getElementById("show-non-focused");
-        if (transformer.showNonFocusedBorders) {
-          button.textContent = "Show Others";
-          button.className = "toggle-btn enabled";
-        } else {
-          button.textContent = "Hide Others";
-          button.className = "toggle-btn disabled";
-        }
+        const scaledFontSize = scaledTextElement.style.fontSize;
+        const dynamicFontSize = dynamicTextElement.style.fontSize;
 
-        console.log(
-          "🔄 Show non-focused toggled:",
-          transformer.showNonFocusedBorders
+        const statusHTML = `
+<strong>Lock Aspect Ratio:</strong> ${
+          transformer.lockAspectRatio ? "✅ Enabled" : "❌ Disabled"
+        }<br>
+<strong>Dynamic Font Size:</strong> ${
+          dynamicFontSizeEnabled ? "✅ Enabled (Best-Fit)" : "❌ Disabled"
+        }<br>
+<br>
+<strong>🟠 Scaled Text:</strong><br>
+&nbsp;&nbsp;Scale: (${scaledScale.x.toFixed(2)}, ${scaledScale.y.toFixed(
+          2
+        )})<br>
+&nbsp;&nbsp;Font Size: ${scaledFontSize.toFixed(1)}px (fixed)<br>
+&nbsp;&nbsp;Width: ${scaledTextElement.width.toFixed(1)}px<br>
+&nbsp;&nbsp;Height: ${scaledTextElement.height.toFixed(1)}px<br>
+&nbsp;&nbsp;Status: ${
+          scaledScale.x !== 1 || scaledScale.y !== 1
+            ? "⚠️ Text pixels stretched"
+            : "✅ Normal"
+        }<br>
+<br>
+<strong>🟢 Dynamic Text (Best-Fit):</strong><br>
+&nbsp;&nbsp;Scale: (${dynamicScale.x.toFixed(2)}, ${dynamicScale.y.toFixed(
+          2
+        )})<br>
+&nbsp;&nbsp;Font Size: ${dynamicFontSize.toFixed(1)}px ${
+          dynamicFontSizeEnabled ? "(best-fit)" : "(fixed)"
+        }<br>
+&nbsp;&nbsp;Base Font Size: ${baseFontSize.toFixed(1)}px<br>
+&nbsp;&nbsp;Width: ${dynamicTextElement.width.toFixed(1)}px<br>
+&nbsp;&nbsp;Height: ${dynamicTextElement.height.toFixed(1)}px<br>
+&nbsp;&nbsp;Container: ${(
+          baseWidth * (hasInverseScaling ? lastTransformScale.x : 1)
+        ).toFixed(1)}w × ${(
+          baseHeight * (hasInverseScaling ? lastTransformScale.y : 1)
+        ).toFixed(1)}h px<br>
+&nbsp;&nbsp;Status: ${
+          dynamicFontSizeEnabled ? "✅ Best-fit active" : "⚠️ Font size fixed"
+        }<br>
+&nbsp;&nbsp;Scaling Type: <strong>${scalingType}</strong><br>
+&nbsp;&nbsp;Word Wrap Width: ${
+          dynamicTextElement.style.wordWrapWidth?.toFixed(1) || "N/A"
+        }px<br>
+&nbsp;&nbsp;Fit Quality: ${calculateFitQuality()}%<br>
+<br>
+<strong>⭐ Star Element:</strong><br>
+&nbsp;&nbsp;Scale: (${starScale.x.toFixed(2)}, ${starScale.y.toFixed(2)})<br>
+<br>
+<strong>Test Instructions:</strong><br>
+&nbsp;&nbsp;1. Drag horizontal handles → Width-only (word wrap adjusts)<br>
+&nbsp;&nbsp;2. Drag vertical handles → Height-only (best-fit font size)<br>
+&nbsp;&nbsp;3. Drag corner handles → Diagonal (best-fit both)<br>
+&nbsp;&nbsp;4. Check "Fit Quality" metric above (100% = perfect fit)
+        `;
+
+        document.getElementById("status-display").innerHTML = statusHTML;
+      }
+
+      function resetLayout() {
+        if (!scaledTextElement || !dynamicTextElement || !starElement) return;
+
+        scaledTextElement.position.set(
+          initialPositions.scaledText.x,
+          initialPositions.scaledText.y
         );
-        updateFocusStatus();
+        dynamicTextElement.position.set(
+          initialPositions.dynamicText.x,
+          initialPositions.dynamicText.y
+        );
+        starElement.position.set(
+          initialPositions.star.x,
+          initialPositions.star.y
+        );
+
+        resetScales();
       }
 
-      function updateFocusStatus() {
-        if (!transformer) return;
+      function resetScales() {
+        if (!scaledTextElement || !dynamicTextElement || !starElement) return;
 
-        const elementNames = ["Circle", "Star", "Rectangle", "Triangle"];
-        const statusDiv = document.getElementById("focus-status");
+        scaledTextElement.scale.set(
+          initialScales.scaledText.x,
+          initialScales.scaledText.y
+        );
+        scaledTextElement.style.fontSize = initialFontSize;
+        scaledTextElement.dirty = true;
+        scaledTextElement.updateText();
 
-        if (transformer.focusedElementIndex >= 0) {
-          const focusedName = elementNames[transformer.focusedElementIndex];
-          statusDiv.innerHTML = `
-            <strong>Focused:</strong> ${focusedName} (index ${
-            transformer.focusedElementIndex
-          })<br>
-            <strong>Nested Selection:</strong> ${
-              transformer.nestedSelectionEnabled ? "Enabled" : "Disabled"
-            }<br>
-            <strong>Show Others:</strong> ${
-              transformer.showNonFocusedBorders ? "Yes" : "No"
-            }
-          `;
-        } else {
-          statusDiv.innerHTML = `
-            <strong>Focused:</strong> None (all elements visible)<br>
-            <strong>Nested Selection:</strong> ${
-              transformer.nestedSelectionEnabled ? "Enabled" : "Disabled"
-            }<br>
-            <strong>Show Others:</strong> ${
-              transformer.showNonFocusedBorders ? "Yes" : "No"
-            }
-          `;
-        }
+        dynamicTextElement.scale.set(
+          initialScales.dynamicText.x,
+          initialScales.dynamicText.y
+        );
+        baseFontSize = initialFontSize;
+        baseWordWrapWidth = 200;
+        dynamicTextElement.style.fontSize = initialFontSize;
+        dynamicTextElement.style.wordWrapWidth = baseWordWrapWidth;
+        dynamicTextElement.dirty = true;
+        dynamicTextElement.updateText();
+        hasInverseScaling = false;
+        scalingType = "none";
+
+        starElement.scale.set(initialScales.star.x, initialScales.star.y);
+
+        updateStatus();
       }
+
+      setTimeout(() => {
+        updateStatus();
+      }, 100);
     </script>
   </body>
 </html>

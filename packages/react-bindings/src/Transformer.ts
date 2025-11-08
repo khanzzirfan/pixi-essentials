@@ -56,10 +56,14 @@ export type TransformerProps = {
   nestedSelectionEnabled?: boolean;
   focusedElementBorderColor?: number;
   focusedElementBorderThickness?: number;
+  focusedElementBorderStyle?: "solid" | "dashed" | "dotted";
+  focusedElementBorderDashPattern?: [number, number];
   showNonFocusedBorders?: boolean;
   individualBorderColor?: number;
   individualBorderThickness?: number;
   individualBorderAlpha?: number;
+  individualBorderStyle?: "solid" | "dashed" | "dotted";
+  individualBorderDashPattern?: [number, number];
 
   // Event handlers for nested selection
   elementfocused?: (element: DisplayObject, index: number) => void;
@@ -229,6 +233,21 @@ export const Transformer: React.FC<TransformerProps> = PixiComponent<
         newProps.focusedElementBorderThickness;
     }
 
+    if (
+      oldProps.focusedElementBorderStyle !== newProps.focusedElementBorderStyle
+    ) {
+      instance.focusedElementBorderStyle =
+        newProps.focusedElementBorderStyle || "dashed";
+    }
+
+    if (
+      oldProps.focusedElementBorderDashPattern !==
+      newProps.focusedElementBorderDashPattern
+    ) {
+      instance.focusedElementBorderDashPattern =
+        newProps.focusedElementBorderDashPattern || [8, 4];
+    }
+
     if (oldProps.showNonFocusedBorders !== newProps.showNonFocusedBorders) {
       instance.showNonFocusedBorders =
         newProps.showNonFocusedBorders !== undefined
@@ -254,6 +273,21 @@ export const Transformer: React.FC<TransformerProps> = PixiComponent<
         newProps.individualBorderAlpha !== undefined
           ? newProps.individualBorderAlpha
           : 1.0; // Default full opacity
+    }
+
+    if (
+      oldProps.individualBorderStyle !== newProps.individualBorderStyle
+    ) {
+      instance.individualBorderStyle =
+        newProps.individualBorderStyle || "solid";
+    }
+
+    if (
+      oldProps.individualBorderDashPattern !==
+      newProps.individualBorderDashPattern
+    ) {
+      instance.individualBorderDashPattern =
+        newProps.individualBorderDashPattern || [8, 4];
     }
 
     // Handle programmatic focus control
